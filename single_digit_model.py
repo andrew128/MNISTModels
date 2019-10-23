@@ -1,118 +1,85 @@
 import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
 import numpy as np
+import time
+'''
+Model architecture:
+'''
+def get_model():
 
-class KerasModel(tf.keras.Model):
-    def __init__(self,):
-        """
-        The model class inherits from tf.keras.Model.
-        It stores the trainable weights as attributes.
-        """
-        super(KerasModel, self).__init__()
-        # Instead of defining variables, we define layers:
-        # when using Keras, we can do the linear layer and the activation function in one step
-        self.dense_1 = tf.keras.layers.Dense(784, activation='relu')
-        self.dense_2 = tf.keras.layers.Dense(2, activation='softmax')
+    # Creating a Sequential Model and adding the layers
+    model = Sequential()
+    model.add(Flatten()) # Flattening the 2D arrays for fully connected layers
+    model.add(Dense(2,activation=tf.nn.softmax))
+    model.compile(optimizer='adam', 
+                loss='sparse_categorical_crossentropy', 
+                metrics=['accuracy'])
+    return model
 
-    def call(self, inputs):
-        """
-        Forward pass, predicts labels given an input image using fully connected layers
-        :return: the probabilites of each label
-        """
-        L1output = self.dense_1(inputs)
-        prbs = self.dense_2(L1output)
+def get_data():
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
-        return prbs
+    # Reshaping the array to 4-dims so that it can work with the Keras API
+    x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
+    x_test = x_test.reshape(x_test.shape[0], 28, 28, 1)
 
-    def loss(self, predictions, labels):
-        """
-        Calculates the model loss
-        :return: the loss of the model as a tensor
-        """
-        return tf.reduce_sum(tf.keras.losses.categorical_crossentropy(predictions, labels))  
+    # Making sure that the values are float so that we can get decimal points after division
+    x_train = x_train.astype('float32')
+    x_test = x_test.astype('float32')
 
-    def accuracy(self, predictions, labels):
-        """
-        Calculates the model accuracy
-        :return: the accuracy of the model as a tensor
-        """
-        correct_prediction = tf.equal(tf.argmax(predictions, 1),
-                        tf.argmax(labels, 1))
-        return tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    # Normalizing the RGB codes by dividing it to the max RGB value.
+    x_train /= 255
+    x_test /= 255
 
-def train(keras_model, x_train, y_train):
-    # Choosing an optimizer
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
-
-    # Loop through 10000 training images
-    for i in range(10000):
-        image = np.reshape(x_train[i], (1,-1))
-        label = y_train[i]
-
-        # Implement backprop:
-        with tf.GradientTape() as tape:
-            predictions = keras_model.call(image) # call the call function
-            loss = keras_model.loss(predictions, label) # call the loss function
-
-            if i % 500 == 0:
-                train_acc = keras_model.accuracy(keras_model(x_train.reshape(-1,784)), y_train)
-                print("Accuracy on training set after {} training steps: {}".format(i, train_acc))
-
-        # The keras Model class has the computed property trainable_variables to conveniently
-        # return all the trainable variables you'd want to adjust based on the gradients
-        gradients = tape.gradient(loss, keras_model.trainable_variables)
-        optimizer.apply_gradients(zip(gradients, keras_model.trainable_variables))
-
-def test(model, test_inputs, test_labels):
-    """
-    Tests the model on the test inputs and labels. For this assignment, 
-    the inputs should be the entire test set, but in the future we will
-    ask you to batch it instead.
-    :param test_inputs: MNIST test data (all images to be tested)
-    :param test_labels: MNIST test labels (all corresponding labels)
-    :return: accuracy - Float (0,1)
-    """
-    return model.accuracy(model(test_inputs.reshape(-1,784)), test_labels)
-
-def get_data(digit_class, x_train, y_train):
-    result_inputs = []
-    result_labels = []
-    for i in range(y_train.shape[0]):
-        if y_train[i] == digit_class:
-            result_inputs.append(x_train[i])
-            result_labels.append(0) # First class represented as 0
-        else:
-            result_inputs.append(x_train[i])
-            result_labels.append(1) # Second class represented as 1
-
-    # Convert data to numpy arrays.
-    result_inputs = np.asarray(result_inputs)
-    result_labels = np.asarray(result_labels)
-
-    # Normalize inputs
-    result_inputs = result_inputs / 255
-
-    # Turn labels into one-hot vectors.
-    result_labels = tf.one_hot(result_labels, depth=2)
-
-    # Change inputs from float64 to float32
-    result_inputs = result_inputs.astype('float32')
-
-    return (result_inputs, result_labels)
-
-
-def main():
-    # Loading in and preprocessing the data
-    mnist = tf.keras.datasets.mnist
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-
-    for i in range(10):
-        result_inputs, result_labels = get_data(i, x_train, y_train)
-        test_inputs, test_labels = get_data(i, x_test, y_test)
-
-        model = KerasModel()
-        train(model, result_inputs, result_labels)
-        print(test(model, test_inputs, test_labels))
+    return (x_train, y_train, x_test, y_test)
     
+def main():
+    # (60000, 28, 28, 1) (60000,) (10000, 28, 28, 1) (10000,)
+    x_train, y_train, x_test, y_test = get_data()
+
+    accuracies = []
+    train_times = []
+    test_times = []
+
+    for i in range(20):
+        all_predicted = None
+        models = []
+
+        before_train = time.time()
+        for i in range(10):
+            # Shape data to be true for only the current i
+            curr_y_train = np.where(y_train == i, 1, 0)
+
+            model = get_model()
+            models.append(model)
+            model.fit(x=x_train,y=curr_y_train, epochs=1)
+
+        before_test = time.time()
+
+        for i, model in enumerate(models):
+            # Make predictions for x_test and get the probabilities
+            # predicted that each input is i
+            predictions = model.predict(x_test)
+            # Get prediction of current digit
+            predictions = predictions.T[1]
+            predictions = np.expand_dims(predictions, axis=1)
+            if i == 0:
+                all_predicted = predictions
+            else:
+                all_predicted = np.append(all_predicted, predictions, axis=1)
+
+        # Get the indices corresponding to the highest predictions for each class.
+        all_predicted_labels = np.argmax(all_predicted, axis=1)
+        num_correct = np.sum(all_predicted_labels == y_test)
+        final_accuracy = num_correct / y_test.shape[0]
+        after_test = time.time()
+
+        accuracies.append(final_accuracy)
+        train_times.append(before_test - before_train)
+        test_times.append(after_test - before_test)
+    
+    print(accuracies, train_times, test_times)
 
 if __name__ == '__main__':
     main()
