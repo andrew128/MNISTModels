@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
-
+import time
 '''
 Model architecture:
 - Single convolution layer with max pooling and a single hidden layer
@@ -44,10 +44,27 @@ def get_data():
     return (x_train, y_train, x_test, y_test)
     
 def main():
+    # (60000, 28, 28, 1) (60000,) (10000, 28, 28, 1) (10000,)
     x_train, y_train, x_test, y_test = get_data()
-    model = get_model()
-    model.fit(x=x_train,y=y_train, epochs=10)
-    model.evaluate(x_test, y_test)
+
+    accuracies = []
+    train_times = []
+    test_times = []
+
+    for i in range(20):
+        model = get_model()
+        before_train = time.time()
+        model.fit(x=x_train,y=y_train, epochs=1)
+        before_test = time.time()
+        accuracy = model.evaluate(x_test, y_test)
+        after_test = time.time()
+
+        accuracies.append(accuracy)
+        train_times.append(before_test - before_train)
+        test_times.append(after_test - before_test)
+    print(accuracies, train_times, test_times)
+    # print('Train time:', before_test - before_train)
+    # print('Test time:', after_test - before_test)
 
 if __name__ == '__main__':
     main()

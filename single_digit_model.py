@@ -105,13 +105,13 @@ def main():
     mnist = tf.keras.datasets.mnist
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-    result_inputs, result_labels = get_data(0, x_train, y_train)
-    test_inputs, test_labels = get_data(0, x_test, y_test)
+    for i in range(10):
+        result_inputs, result_labels = get_data(i, x_train, y_train)
+        test_inputs, test_labels = get_data(i, x_test, y_test)
 
-
-    model = KerasModel()
-    train(model, result_inputs, result_labels)
-    print(test(model, test_inputs, test_labels))
+        model = KerasModel()
+        train(model, result_inputs, result_labels)
+        print(test(model, test_inputs, test_labels))
     
 
 if __name__ == '__main__':
