@@ -1,7 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
+from sklearn.metrics import confusion_matrix
 import time
+import numpy as np
 '''
 Model architecture:
 - Single convolution layer with max pooling and a single hidden layer
@@ -51,7 +53,10 @@ def main():
     train_times = []
     test_times = []
 
-    for i in range(20):
+    confusion_matrices = None
+
+    num_epochs = 20
+    for i in range(num_epochs):
         model = get_model()
         before_train = time.time()
         model.fit(x=x_train,y=y_train, epochs=1)
@@ -59,12 +64,21 @@ def main():
         accuracy = model.evaluate(x_test, y_test)
         after_test = time.time()
 
+        # Calculate the confusion matrix
+        predictions = model.predict(x_test).argmax(axis=1)
+        cm = confusion_matrix(y_test, predictions)
+
+        if i == 0:
+            confusion_matrices = cm
+        else:
+            confusion_matrices = np.add(confusion_matrices, cm)
+
         accuracies.append(accuracy)
         train_times.append(before_test - before_train)
         test_times.append(after_test - before_test)
+
+    print(confusion_matrices / num_epochs)
     print(accuracies, train_times, test_times)
-    # print('Train time:', before_test - before_train)
-    # print('Test time:', after_test - before_test)
 
 if __name__ == '__main__':
     main()

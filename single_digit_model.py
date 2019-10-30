@@ -3,6 +3,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
 import numpy as np
 import time
+import numpy as np
+from sklearn.metrics import confusion_matrix
 '''
 Model architecture:
 '''
@@ -42,29 +44,43 @@ def main():
     train_times = []
     test_times = []
 
-    for i in range(20):
+    num_classes = 10
+    confusion_matrices = [None] * num_classes
+
+    num_epochs = 20
+    for i in range(num_epochs):
+        print('Epoch', i)
         all_predicted = None
         models = []
 
         before_train = time.time()
-        for i in range(10):
+        for j in range(10):
             # Shape data to be true for only the current i
-            curr_y_train = np.where(y_train == i, 1, 0)
+            curr_y_train = np.where(y_train == j, 1, 0)
 
             model = get_model()
             models.append(model)
             model.fit(x=x_train,y=curr_y_train, epochs=1)
 
+            # Calculate the confusion matrix
+            predictions = model.predict(x_test).argmax(axis=1)
+            cm = confusion_matrix(np.where(y_test == j, 1, 0), predictions)
+
+            if i == 0:
+                confusion_matrices[j] = cm
+            else:
+                confusion_matrices[j] = np.add(confusion_matrices[j], cm)
+
         before_test = time.time()
 
-        for i, model in enumerate(models):
+        for j, model in enumerate(models):
             # Make predictions for x_test and get the probabilities
             # predicted that each input is i
             predictions = model.predict(x_test)
             # Get prediction of current digit
             predictions = predictions.T[1]
             predictions = np.expand_dims(predictions, axis=1)
-            if i == 0:
+            if j == 0:
                 all_predicted = predictions
             else:
                 all_predicted = np.append(all_predicted, predictions, axis=1)
@@ -72,13 +88,17 @@ def main():
         # Get the indices corresponding to the highest predictions for each class.
         all_predicted_labels = np.argmax(all_predicted, axis=1)
         num_correct = np.sum(all_predicted_labels == y_test)
-        final_accuracy = num_correct / y_test.shape[0]
+        final_accuracy = num_correct / float(y_test.shape[0])
         after_test = time.time()
 
         accuracies.append(final_accuracy)
         train_times.append(before_test - before_train)
         test_times.append(after_test - before_test)
     
+    for cm in confusion_matrices:
+        cm = cm / num_epochs
+    
+    print(confusion_matrices)
     print(accuracies, train_times, test_times)
 
 if __name__ == '__main__':
