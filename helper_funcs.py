@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 def get_data():
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
@@ -24,6 +25,7 @@ def get_prob_distr(prob_data, predictions, labels, num_preds, correct=True):
     :param labels:
     :param num_preds:
     :param correct:
+    :return:
     '''
     output_prob_distr = []
 
@@ -37,3 +39,24 @@ def get_prob_distr(prob_data, predictions, labels, num_preds, correct=True):
             output_prob_distr.append(prob_data[i])
 
     return output_prob_distr
+
+def get_average_highest(prob_data, predictions, labels, x_highest, correct=True):
+    '''
+    :param prob_data:
+    :param predictions:
+    :param labels:
+    :param x_highest:
+    :param correct:
+    :return:
+    '''
+    average_highest_probs = np.zeros(x_highest)
+
+    for i in range(predictions.shape[0]):
+        sorted_prbs = np.sort(prob_data[i])[::-1]
+        
+        if predictions[i] == labels[i] and correct:
+            average_highest_probs = np.add(average_highest_probs, sorted_prbs[:x_highest])
+        elif predictions[i] != labels[i] and not correct:
+            average_highest_probs = np.add(average_highest_probs, sorted_prbs[:x_highest])
+
+    return average_highest_probs / predictions.shape[0]

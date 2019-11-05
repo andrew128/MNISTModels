@@ -5,7 +5,7 @@ import numpy as np
 import time
 import numpy as np
 from sklearn.metrics import confusion_matrix
-import helper_funcs as helper
+import helper_funcs as helpers
 
 '''
 Model architecture:
@@ -23,7 +23,7 @@ def get_model():
     
 def main():
     # (60000, 28, 28, 1) (60000,) (10000, 28, 28, 1) (10000,)
-    x_train, y_train, x_test, y_test = helper.get_data()
+    x_train, y_train, x_test, y_test = helpers.get_data()
 
     accuracies = []
     train_times = []
@@ -32,7 +32,7 @@ def main():
     num_classes = 10
     confusion_matrices = [None] * num_classes
 
-    num_epochs = 20
+    num_epochs = 5
     for i in range(num_epochs):
         print('Epoch', i)
         all_predicted = None
@@ -72,19 +72,23 @@ def main():
 
         # Get the indices corresponding to the highest predictions for each class.
         all_predicted_labels = np.argmax(all_predicted, axis=1)
-        num_correct = np.sum(all_predicted_labels == y_test)
-        final_accuracy = num_correct / float(y_test.shape[0])
-        after_test = time.time()
 
-        accuracies.append(final_accuracy)
-        train_times.append(before_test - before_train)
-        test_times.append(after_test - before_test)
+        print(helpers.get_average_highest(all_predicted, all_predicted_labels, y_test, 3, True))
+        print(helpers.get_average_highest(all_predicted, all_predicted_labels, y_test, 3, False))
+
+        # num_correct = np.sum(all_predicted_labels == y_test)
+        # final_accuracy = num_correct / float(y_test.shape[0])
+        # after_test = time.time()
+
+        # accuracies.append(final_accuracy)
+        # train_times.append(before_test - before_train)
+        # test_times.append(after_test - before_test)
     
-    for cm in confusion_matrices:
-        cm = cm / num_epochs
+    # for cm in confusion_matrices:
+    #     cm = cm / num_epochs
     
-    print(confusion_matrices)
-    print(accuracies, train_times, test_times)
+    # print(confusion_matrices)
+    # print(accuracies, train_times, test_times)
 
 if __name__ == '__main__':
     main()
