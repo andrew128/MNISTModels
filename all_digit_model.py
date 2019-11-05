@@ -4,7 +4,12 @@ from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2
 from sklearn.metrics import confusion_matrix
 import time
 import numpy as np
+<<<<<<< HEAD
 import helper_funcs as helpers
+=======
+import helper_funcs as helper
+
+>>>>>>> 300a1117e37a4026064c08061497a30132ac0aed
 '''
 Model architecture:
 - Single convolution layer with max pooling and a single hidden layer
@@ -28,10 +33,17 @@ def get_model():
                 loss='sparse_categorical_crossentropy', 
                 metrics=['accuracy'])
     return model
+<<<<<<< HEAD
     
 def main():
     # (60000, 28, 28, 1) (60000,) (10000, 28, 28, 1) (10000,)
     x_train, y_train, x_test, y_test = helpers.get_data()
+=======
+
+def main():
+    # (60000, 28, 28, 1) (60000,) (10000, 28, 28, 1) (10000,)
+    x_train, y_train, x_test, y_test = helper.get_data()
+>>>>>>> 300a1117e37a4026064c08061497a30132ac0aed
 
     accuracies = []
     train_times = []
