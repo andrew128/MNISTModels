@@ -5,6 +5,8 @@ import numpy as np
 import time
 import numpy as np
 from sklearn.metrics import confusion_matrix
+import helper_funcs as helper
+
 '''
 Model architecture:
 '''
@@ -18,27 +20,10 @@ def get_model():
                 loss='sparse_categorical_crossentropy', 
                 metrics=['accuracy'])
     return model
-
-def get_data():
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-
-    # Reshaping the array to 4-dims so that it can work with the Keras API
-    x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
-    x_test = x_test.reshape(x_test.shape[0], 28, 28, 1)
-
-    # Making sure that the values are float so that we can get decimal points after division
-    x_train = x_train.astype('float32')
-    x_test = x_test.astype('float32')
-
-    # Normalizing the RGB codes by dividing it to the max RGB value.
-    x_train /= 255
-    x_test /= 255
-
-    return (x_train, y_train, x_test, y_test)
     
 def main():
     # (60000, 28, 28, 1) (60000,) (10000, 28, 28, 1) (10000,)
-    x_train, y_train, x_test, y_test = get_data()
+    x_train, y_train, x_test, y_test = helper.get_data()
 
     accuracies = []
     train_times = []
