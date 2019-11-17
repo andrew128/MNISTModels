@@ -39,7 +39,7 @@ def main():
 
     confusion_matrices = None
 
-    num_epochs = 5
+    num_epochs = 1
     average_highest_probs_correct = []
     average_highest_probs_incorrect = []
 
@@ -54,9 +54,14 @@ def main():
         prediction_probs = model.predict(x_test) 
         predictions = prediction_probs.argmax(axis=1)
 
+        print(accuracy)
+        output = helpers.get_prob_distr_cases(prediction_probs, y_test, 9, 4)
+        for item in output:
+            print(item)
+
         # helpers.get_prob_distr(prediction_probs, predictions, y_test, 3, True)
-        average_highest_probs_correct.append(helpers.get_average_highest(prediction_probs, predictions, y_test, 3, True))
-        average_highest_probs_incorrect.append(helpers.get_average_highest(prediction_probs, predictions, y_test, 3, False))
+        # average_highest_probs_correct.append(helpers.get_average_highest(prediction_probs, predictions, y_test, 3, True))
+        # average_highest_probs_incorrect.append(helpers.get_average_highest(prediction_probs, predictions, y_test, 3, False))
 
         # Calculate the confusion matrix
         # cm = confusion_matrix(y_test, predictions)
@@ -71,11 +76,11 @@ def main():
         test_times.append(after_test - before_test)
 
     # print(confusion_matrices / num_epochs)
-    print(accuracies, train_times, test_times)
-    print('==================')
-    print(average_highest_probs_correct)
-    print('==================')
-    print(average_highest_probs_incorrect)
+    # print(accuracies, train_times, test_times)
+    # print('==================')
+    # print(average_highest_probs_correct)
+    # print('==================')
+    # print(average_highest_probs_incorrect)
 
 if __name__ == '__main__':
     main()

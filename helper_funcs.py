@@ -42,6 +42,8 @@ def get_prob_distr(prob_data, predictions, labels, num_preds, correct=True):
 
 def get_average_highest(prob_data, predictions, labels, x_highest, correct=True):
     '''
+    This function gets the average of the 3 highest predicted probabilities for when
+    the prediction is correct or not depending on the input correct param.
     :param prob_data:
     :param predictions:
     :param labels:
@@ -63,3 +65,25 @@ def get_average_highest(prob_data, predictions, labels, x_highest, correct=True)
             num_preds += 1
 
     return average_highest_probs / num_preds
+
+def get_prob_distr_cases(prediction_probs, labels, actual, expected):
+    '''
+    This function gets the probability distributions for when the predicted label
+    is the actual and the label is the expected.
+    :param prediction_probs:
+    :param labels:
+    :param actual:
+    :param expected:
+    :return: list of probability distributions
+    '''
+    output = []
+
+    predictions = prediction_probs.argmax(axis=1)
+
+    for i in range(predictions.shape[0]):
+        if labels[i] == expected and predictions[i] == actual:
+            output.append(prediction_probs[i].tolist())
+
+    return output
+
+# def get_prob_distr_incorrect_preds(predictions)
