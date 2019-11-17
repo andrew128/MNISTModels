@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
-from sklearn.metrics import confusion_matrix
+# from sklearn.metrics import confusion_matrix
 import time
 import numpy as np
 import helper_funcs as helpers
@@ -40,6 +40,9 @@ def main():
     confusion_matrices = None
 
     num_epochs = 5
+    average_highest_probs_correct = []
+    average_highest_probs_incorrect = []
+
     for i in range(num_epochs):
         model = get_model()
         before_train = time.time()
@@ -52,8 +55,8 @@ def main():
         predictions = prediction_probs.argmax(axis=1)
 
         # helpers.get_prob_distr(prediction_probs, predictions, y_test, 3, True)
-        print(helpers.get_average_highest(prediction_probs, predictions, y_test, 3, True))
-        print(helpers.get_average_highest(prediction_probs, predictions, y_test, 3, False))
+        average_highest_probs_correct.append(helpers.get_average_highest(prediction_probs, predictions, y_test, 3, True))
+        average_highest_probs_incorrect.append(helpers.get_average_highest(prediction_probs, predictions, y_test, 3, False))
 
         # Calculate the confusion matrix
         # cm = confusion_matrix(y_test, predictions)
@@ -63,12 +66,16 @@ def main():
         # else:
         #     confusion_matrices = np.add(confusion_matrices, cm)
 
-        # accuracies.append(accuracy)
-        # train_times.append(before_test - before_train)
-        # test_times.append(after_test - before_test)
+        accuracies.append(accuracy)
+        train_times.append(before_test - before_train)
+        test_times.append(after_test - before_test)
 
     # print(confusion_matrices / num_epochs)
-    # print(accuracies, train_times, test_times)
+    print(accuracies, train_times, test_times)
+    print('==================')
+    print(average_highest_probs_correct)
+    print('==================')
+    print(average_highest_probs_incorrect)
 
 if __name__ == '__main__':
     main()

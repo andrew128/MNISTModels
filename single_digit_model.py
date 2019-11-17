@@ -4,7 +4,7 @@ from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2
 import numpy as np
 import time
 import numpy as np
-from sklearn.metrics import confusion_matrix
+# from sklearn.metrics import confusion_matrix
 import helper_funcs as helpers
 
 '''
@@ -29,8 +29,11 @@ def main():
     train_times = []
     test_times = []
 
+    average_highest_probs_correct = []
+    average_highest_probs_incorrect = []
+
     num_classes = 10
-    confusion_matrices = [None] * num_classes
+    # confusion_matrices = [None] * num_classes
 
     num_epochs = 5
     for i in range(num_epochs):
@@ -39,6 +42,8 @@ def main():
         models = []
 
         before_train = time.time()
+
+        # Train the models.
         for j in range(10):
             # Shape data to be true for only the current i
             curr_y_train = np.where(y_train == j, 1, 0)
@@ -48,13 +53,13 @@ def main():
             model.fit(x=x_train,y=curr_y_train, epochs=1)
 
             # Calculate the confusion matrix
-            predictions = model.predict(x_test).argmax(axis=1)
-            cm = confusion_matrix(np.where(y_test == j, 1, 0), predictions)
+            # predictions = model.predict(x_test).argmax(axis=1)
+            # cm = confusion_matrix(np.where(y_test == j, 1, 0), predictions)
 
-            if i == 0:
-                confusion_matrices[j] = cm
-            else:
-                confusion_matrices[j] = np.add(confusion_matrices[j], cm)
+            # if i == 0:
+            #     confusion_matrices[j] = cm
+            # else:
+            #     confusion_matrices[j] = np.add(confusion_matrices[j], cm)
 
         before_test = time.time()
 
@@ -73,14 +78,14 @@ def main():
         # Get the indices corresponding to the highest predictions for each class.
         all_predicted_labels = np.argmax(all_predicted, axis=1)
 
-        print(helpers.get_average_highest(all_predicted, all_predicted_labels, y_test, 3, True))
-        print(helpers.get_average_highest(all_predicted, all_predicted_labels, y_test, 3, False))
+        average_highest_probs_correct.append(helpers.get_average_highest(all_predicted, all_predicted_labels, y_test, 3, True))
+        average_highest_probs_incorrect.append(helpers.get_average_highest(all_predicted, all_predicted_labels, y_test, 3, False))
 
-        # num_correct = np.sum(all_predicted_labels == y_test)
-        # final_accuracy = num_correct / float(y_test.shape[0])
+        num_correct = np.sum(all_predicted_labels == y_test)
+        final_accuracy = num_correct / float(y_test.shape[0])
         # after_test = time.time()
 
-        # accuracies.append(final_accuracy)
+        accuracies.append(final_accuracy)
         # train_times.append(before_test - before_train)
         # test_times.append(after_test - before_test)
     
@@ -89,6 +94,9 @@ def main():
     
     # print(confusion_matrices)
     # print(accuracies, train_times, test_times)
+    print(accuracies)
+    print(average_highest_probs_correct)
+    print(average_highest_probs_incorrect)
 
 if __name__ == '__main__':
     main()

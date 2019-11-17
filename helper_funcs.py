@@ -50,13 +50,16 @@ def get_average_highest(prob_data, predictions, labels, x_highest, correct=True)
     :return:
     '''
     average_highest_probs = np.zeros(x_highest)
+    num_preds = 0
 
     for i in range(predictions.shape[0]):
         sorted_prbs = np.sort(prob_data[i])[::-1]
         
         if predictions[i] == labels[i] and correct:
             average_highest_probs = np.add(average_highest_probs, sorted_prbs[:x_highest])
+            num_preds += 1
         elif predictions[i] != labels[i] and not correct:
             average_highest_probs = np.add(average_highest_probs, sorted_prbs[:x_highest])
+            num_preds += 1
 
-    return average_highest_probs / predictions.shape[0]
+    return average_highest_probs / num_preds
