@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
 from sklearn.svm import SVC
@@ -53,10 +54,17 @@ def get_trained_simple_all_digit_model(inputs, labels):
     return model
 
 '''
-10 digit SVM
+10 digit SVM with RBF kernel
 '''
 def get_10_digit_SVM(inputs, labels):
-    svclassifier = SVC(kernel='rbf')
+    print('Get 10 digit SVM')
+    inputs = inputs[:100]
+    labels = labels[:100]
+    # Need to flatten inputs from (num_data, 28, 28, 1) to (num_data, 784)
+    inputs = np.reshape(inputs, (-1, 784))
+    print(inputs.shape)
+    # svclassifier = SVC(kernel='rbf')
+    svclassifier = SVC(gamma=0.1, kernel='poly', random_state = 0, probability=True)
     svclassifier.fit(inputs, labels)
     return svclassifier
 

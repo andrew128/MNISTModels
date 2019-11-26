@@ -1,5 +1,7 @@
 import tensorflow as tf
 import numpy as np
+import time
+from models import *
 
 def get_data():
     '''
@@ -105,3 +107,27 @@ def get_prob_distr_based_on_correct(prediction_probs, labels, correct=True):
             output.append(prediction_probs[i].tolist())
 
     return output
+
+def get_model_training_times(model, x_train, y_train, num_tests, is_keras_model=True):
+    '''
+    Get the average training time for a model given the training data 
+    over num_tests # of times.
+    '''
+    train_time_sum = 0
+    for i in range(num_tests):
+        before_train = time.time()
+        model.fit(x=x_train,y=y_train, epochs=1)
+        after_train = time.time()
+        train_time_sum += after_train - before_train
+    
+    return train_time_sum / num_tests
+
+def get_model_testing_times(model, x_test, y_test, num_tests, is_keras_model=True):
+    test_time_sum = 0
+    for i in range(num_tests):
+        before_test = time.time()
+        model.fit(x=x_test,y=y_test, epochs=1)
+        after_test = time.time()
+        test_time_sum += after_test - before_test
+    
+    return test_time_sum / num_tests
