@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 import time
 from models import *
 
@@ -131,3 +132,15 @@ def get_model_testing_times(model, x_test, y_test, num_tests, is_keras_model=Tru
         test_time_sum += after_test - before_test
     
     return test_time_sum / num_tests
+
+def visualize_mnist_data(data, metadata=None):
+    '''
+    Visualize MNIST data
+    '''
+    for i in range(len(data)):
+        if metadata != None:
+            title = 'Highest Prob: ' + str(metadata[i][0]) + ' Predicted: ' \
+                + str(metadata[i][1]) + ' Actual: ' + str(metadata[i][2])
+            plt.title(title)
+        plt.imshow(np.squeeze(data[i]), cmap='gray')
+        plt.show()

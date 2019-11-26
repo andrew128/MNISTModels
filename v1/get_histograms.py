@@ -85,7 +85,7 @@ def main():
     # all_digit_SVM = tf.keras.models.load_model('all_digit_SVM')
     # --------------------------------------------------
     complex_all_digit_train_time = helpers.get_model_training_times(trained_complex_all_digit_model, x_train, y_train, 10)
-    complex_all_digit_test_time = helpers.get_model_training_times(trained_complex_all_digit_model, x_train, y_train, 10)
+    complex_all_digit_test_time = helpers.get_model_training_times(trained_complex_all_digit_model, x_test, y_test, 10)
 
     # complex_correct_metadata = get_metadata(complex_all_digit_percentages_correct)
     # complex_incorrect_metadata = get_metadata(complex_all_digit_percentages_incorrect)
@@ -93,7 +93,7 @@ def main():
     # gen_histogram(complex_all_digit_percentages_incorrect, 'Complex All Digit Incorrect')
 
     simple_all_digit_train_time = helpers.get_model_training_times(trained_simple_all_digit_model, x_train, y_train, 10)
-    simple_all_digit_test_time = helpers.get_model_training_times(trained_simple_all_digit_model, x_train, y_train, 10)
+    simple_all_digit_test_time = helpers.get_model_training_times(trained_simple_all_digit_model, x_test, y_test, 10)
     
     # simple_correct_metadata = get_metadata(simple_all_digit_percentages_correct)
     # simple_incorrect_metadata = get_metadata(simple_all_digit_percentages_incorrect)
