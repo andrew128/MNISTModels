@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
+from sklearn.svm import SVC
 import helper_funcs as helpers
 
 '''
@@ -31,6 +32,33 @@ def get_trained_complex_all_digit_model(inputs, labels):
     model = get_untrained_complex_all_digit_model()
     model.fit(x=inputs,y=labels, epochs=1)
     return model
+
+'''
+Simple 10 digit model
+'''
+def get_untrained_simple_all_digit_model():
+
+    # Creating a Sequential Model and adding the layers
+    model = Sequential()
+    model.add(Flatten()) # Flattening the 2D arrays for fully connected layers
+    model.add(Dense(10,activation=tf.nn.softmax))
+    model.compile(optimizer='adam', 
+                loss='sparse_categorical_crossentropy', 
+                metrics=['accuracy'])
+    return model
+
+def get_trained_simple_all_digit_model(inputs, labels):
+    model = get_untrained_simple_all_digit_model()
+    model.fit(x=inputs,y=labels, epochs=1)
+    return model
+
+'''
+10 digit SVM
+'''
+def get_10_digit_SVM(inputs, labels):
+    svclassifier = SVC(kernel='rbf')
+    svclassifier.fit(inputs, labels)
+    return svclassifier
 
 '''
 Model architecture:
