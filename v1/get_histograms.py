@@ -51,7 +51,7 @@ def get_metadata(percentage_data):
     metadata['Variance'] = np.var(percentage_data)
     return metadata
 
-def main():
+def get_histogram_data():
     x_train, y_train, x_test, y_test = helpers.get_data()
 
     # Complex model with CNN
@@ -113,6 +113,52 @@ def main():
 
     print(complex_all_digit_train_time, complex_all_digit_test_time)
     print(simple_all_digit_train_time, simple_all_digit_test_time)
+
+def get_combined_histogram_data():
+    '''
+    Get histogram data for the simple model when the simple model is correct/incorrect
+    for when the complex model is correct/incorrect.
+    '''
+    x_train, y_train, x_test, y_test = helpers.get_data()
+
+    trained_complex_all_digit_model = tf.keras.models.load_model('trained_complex_all_digit_model')
+    trained_simple_all_digit_model = tf.keras.models.load_model('trained_simple_all_digit_model')
+
+    # For each data point in x_test, add probability of simple model to list if simple got right and complex got wrong
+    # or simple got wrong and complex got right.
+    simple_correct_complex_incorrect = []
+    simple_incorrect_complex_correct = []
+
+    complex_probs = trained_complex_all_digit_model.predict(x_test)
+    complex_preds = complex_probs.argmax(axis=1)
+    simple_probs = trained_simple_all_digit_model.predict(x_test)
+    simple_preds = simple_probs.argmax(axis=1)
+
+    for i in range(y_test.shape[0]):
+        label = y_test[i]
+        complex_pred = complex_preds[i]
+        simple_pred = simple_preds[i]
+
+        simple_prob = np.max(simple_probs[i])
+
+        if simple_pred == label and complex_pred != label:
+            simple_correct_complex_incorrect.append(simple_prob)
+            # print(simple_prob)
+        elif simple_pred != label and complex_pred == label:
+            simple_incorrect_complex_correct.append(simple_prob)
+            # print(simple_prob)
+
+    gen_histogram(simple_correct_complex_incorrect, 'Simple Correct Complex Incorrect')
+    gen_histogram(simple_incorrect_complex_correct, 'Simple Incorrect Complex Correct')
+    print(get_metadata(simple_correct_complex_incorrect))
+    print('--------------------------')
+    print(get_metadata(simple_incorrect_complex_correct))
+    print('--------------------------')
+    # print('Complex Accuracy:', trained_complex_all_digit_model.evaluate(x_test, y_test))
+    # print('Simple Accuracy:', trained_simple_all_digit_model.evaluate(x_test, y_test))
+
+def main():
+    get_combined_histogram_data()
 
 if __name__ == '__main__':
     main()
