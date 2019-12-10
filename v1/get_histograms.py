@@ -114,10 +114,11 @@ def get_histogram_data():
     print(complex_all_digit_train_time, complex_all_digit_test_time)
     print(simple_all_digit_train_time, simple_all_digit_test_time)
 
-def get_combined_histogram_data():
+def get_combined_histogram_data(simple_data=True):
     '''
-    Get histogram data for the simple model when the simple model is correct/incorrect
+    Get histogram data for the model when the simple model is correct/incorrect
     for when the complex model is correct/incorrect.
+    The model is simple if simple_data is True. Otherwise the data is from the complex model
     '''
     x_train, y_train, x_test, y_test = helpers.get_data()
 
@@ -139,17 +140,25 @@ def get_combined_histogram_data():
         complex_pred = complex_preds[i]
         simple_pred = simple_preds[i]
 
-        simple_prob = np.max(simple_probs[i])
+        if simple_data:
+            prob = np.max(simple_probs[i])
+        else:
+            prob = np.max(complex_probs[i])
 
         if simple_pred == label and complex_pred != label:
-            simple_correct_complex_incorrect.append(simple_prob)
+            simple_correct_complex_incorrect.append(prob)
             # print(simple_prob)
         elif simple_pred != label and complex_pred == label:
-            simple_incorrect_complex_correct.append(simple_prob)
+            simple_incorrect_complex_correct.append(prob)
             # print(simple_prob)
 
-    gen_histogram(simple_correct_complex_incorrect, 'Simple Correct Complex Incorrect')
-    gen_histogram(simple_incorrect_complex_correct, 'Simple Incorrect Complex Correct')
+    if simple_data:
+        type_of_data = 'Simple Data'
+    else:
+        type_of_data = 'Complex Data'
+
+    gen_histogram(simple_correct_complex_incorrect, 'Simple Correct Complex Incorrect - ' + type_of_data)
+    gen_histogram(simple_incorrect_complex_correct, 'Simple Incorrect Complex Correct - ' + type_of_data)
     print(get_metadata(simple_correct_complex_incorrect))
     print('--------------------------')
     print(get_metadata(simple_incorrect_complex_correct))
@@ -157,8 +166,16 @@ def get_combined_histogram_data():
     # print('Complex Accuracy:', trained_complex_all_digit_model.evaluate(x_test, y_test))
     # print('Simple Accuracy:', trained_simple_all_digit_model.evaluate(x_test, y_test))
 
+def get_combined_model_accuracy(accuracy_bound=0.56):
+    '''
+    Get the accuracy using both the simple and the combined.
+    When the simple's highest prediction value is less than the accuracy_bound input,
+    the complex model's prediction is used.
+    '''
+    pass
+
 def main():
-    get_combined_histogram_data()
+    get_combined_histogram_data(simple_data=True)
 
 if __name__ == '__main__':
     main()
