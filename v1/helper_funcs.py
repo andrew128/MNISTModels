@@ -144,3 +144,16 @@ def visualize_mnist_data(data, metadata=None):
             plt.title(title)
         plt.imshow(np.squeeze(data[i]), cmap='gray')
         plt.show()
+
+def get_metadata(percentage_data):
+    '''
+    Get data about percentage data.
+    '''
+    metadata = {}
+    metadata['Min'] = np.amin(percentage_data)
+    metadata['Max'] = np.amax(percentage_data)
+    metadata['Median'] = np.median(percentage_data)
+    metadata['Mean'] = np.mean(percentage_data)
+    metadata['StandardDeviation'] = np.std(percentage_data)
+    metadata['Variance'] = np.var(percentage_data)
+    return metadata

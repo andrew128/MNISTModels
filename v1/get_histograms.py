@@ -166,14 +166,6 @@ def get_combined_histogram_data(simple_data=True):
     # print('Complex Accuracy:', trained_complex_all_digit_model.evaluate(x_test, y_test))
     # print('Simple Accuracy:', trained_simple_all_digit_model.evaluate(x_test, y_test))
 
-def get_combined_model_accuracy(accuracy_bound=0.56):
-    '''
-    Get the accuracy using both the simple and the combined.
-    When the simple's highest prediction value is less than the accuracy_bound input,
-    the complex model's prediction is used.
-    '''
-    pass
-
 def main():
     get_combined_histogram_data(simple_data=True)
 
