@@ -8,6 +8,55 @@ import time
 import helper_funcs as helpers
 from models import *
 
+def get_combined_model_accuracy_slow(confidence_bound=0.56):
+    x_train, y_train, x_test, y_test = helpers.get_data()
+
+    combined_accuracies = []
+    combined_times = []
+    for i in range(10):
+        print('Iteration:', i)
+        trained_complex_all_digit_model = tf.keras.models.load_model('./models/trained_complex_all_digit_model_' + str(i))
+
+        trained_simple_all_digit_model = tf.keras.models.load_model('./models/trained_simple_all_digit_model_' + str(i))
+
+        before_time = time.time()
+
+        # Combined
+        simple_probs = trained_simple_all_digit_model.predict(x_test)
+        simple_highest_probs = np.amax(simple_probs, axis=1)
+        simple_preds = simple_probs.argmax(axis=1)
+
+        combined_predictions = []
+
+        for i in range(y_test.shape[0]):
+            label = y_test[i]
+            if simple_highest_probs[i] > confidence_bound:
+                # print('simple pred', simple_preds[i])
+                combined_predictions.append(simple_preds[i])
+            else:
+                complex_pred = trained_complex_all_digit_model.predict(np.expand_dims(x_test[i], axis=0)).argmax(axis=1)[0]
+                # print('complex pred:', complex_pred)
+                combined_predictions.append(complex_pred)
+            
+        correct_predictions = tf.equal(combined_predictions, y_test)
+        accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
+
+        after_time = time.time()
+
+        combined_accuracies.append(accuracy.numpy())
+
+        combined_times.append(after_time - before_time)
+
+        print('accuracy:', accuracy.numpy())
+        print('time:', after_time - before_time)
+    
+    print('=========================')
+    print('Combined (Slow):')
+    print('Average Accuracy:', np.average(combined_accuracies))
+    print('Average Time:', np.average(combined_times))
+    print('=========================')
+    
+
 def get_combined_model_accuracy(confidence_bound=0.56):
     '''
     Get the accuracy using both the simple and the combined.
@@ -16,27 +65,15 @@ def get_combined_model_accuracy(confidence_bound=0.56):
     '''
     x_train, y_train, x_test, y_test = helpers.get_data()
 
-    complex_accuracies = []
-    simple_accuracies = []
     combined_accuracies = []
+    combined_times = []
+
     for i in range(10):
-        # trained_complex_all_digit_model = get_trained_complex_all_digit_model(x_train, y_train)
-        # trained_complex_all_digit_model.save('trained_complex_all_digit_model_' + str(i))
+        trained_complex_all_digit_model = tf.keras.models.load_model('./models/trained_complex_all_digit_model_' + str(i))
 
-        trained_complex_all_digit_model = tf.keras.models.load_model('trained_complex_all_digit_model_' + str(i))
+        trained_simple_all_digit_model = tf.keras.models.load_model('./models/trained_simple_all_digit_model_' + str(i))
 
-        # trained_simple_all_digit_model = get_trained_simple_all_digit_model(x_train, y_train)
-        # trained_simple_all_digit_model.save('trained_simple_all_digit_model_' + str(i))
-
-        trained_simple_all_digit_model = tf.keras.models.load_model('trained_simple_all_digit_model_' + str(i))
-
-        complex_accuracy = trained_complex_all_digit_model.evaluate(x_test, y_test)[1]
-        # print('Complex Accuracy:', complex_accuracy)
-        complex_accuracies.append(complex_accuracy)
-
-        simple_accuracy = trained_simple_all_digit_model.evaluate(x_test, y_test)[1]
-        # print('Simple Accuracy:', simple_accuracy)
-        simple_accuracies.append(simple_accuracy)
+        before_time = time.time()
 
         complex_probs = trained_complex_all_digit_model.predict(x_test)
         complex_highest_probs = np.amax(complex_probs, axis=1)
@@ -49,38 +86,25 @@ def get_combined_model_accuracy(confidence_bound=0.56):
         combined_predictions = np.where(simple_highest_probs > confidence_bound, simple_preds, complex_preds)
         correct_predictions = tf.equal(combined_predictions, y_test)
         accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
+
+        after_time = time.time()
+
         combined_accuracies.append(accuracy.numpy())
-        print('Combined Accuracy:', accuracy.numpy())
+        combined_times.append(after_time - before_time)
+
+        # print('Combined Accuracy:', accuracy.numpy())
+        
     
-    data = {}
-    data['complex_' + str(confidence_bound)] = []
-    data['complex_' + str(confidence_bound)].append(np.median(complex_accuracies))
-    data['complex_' + str(confidence_bound)].append(np.average(complex_accuracies))
+    print('===========================')
+    print('Combined (fast)')
+    print('Average Accuracy:', np.average(combined_accuracies))
+    print('Average Time:', np.average(combined_times))
+    print('===========================')
 
-    data['simple_' + str(confidence_bound)] = []
-    data['simple_' + str(confidence_bound)].append(np.median(simple_accuracies))
-    data['simple_' + str(confidence_bound)].append(np.average(simple_accuracies))
-
-    data['combined_' + str(confidence_bound)] = []
-    data['combined_' + str(confidence_bound)].append(np.median(combined_accuracies))
-    data['combined_' + str(confidence_bound)].append(np.average(combined_accuracies))
-    # data['complex_metadata'] = helpers.get_metadata(complex_accuracies)
-
-    # print('Complex Accuracies:', complex_accuracies)
-    # print(helpers.get_metadata(complex_accuracies))
-
-    # print('Simple Accuracies:', simple_accuracies)
-    # print(helpers.get_metadata(simple_accuracies))
-
-    # print('Combined Accuracies:', combined_accuracies)
-    # print(helpers.get_metadata(combined_accuracies))
     
-    return data
-    
-def get_combined_model_latency():
+def get_combined_model_data_splits():
     '''
-    Get time the combined model takes to predict the testing set for specific dataset splits.
-    Returns arrays where each index contains the times and accuracies for a given data split.
+    Prints arrays where each index contains the times and accuracies of the combined model for a given data split.
     '''
     x_train, y_train, x_test, y_test = helpers.get_data()
     trained_complex_all_digit_model = tf.keras.models.load_model('./models/trained_complex_all_digit_model')
@@ -172,21 +196,22 @@ def get_times_and_accuracies(model):
     print('Average Time:', average_time)
     print('Average Accuracy:', average_accuracy)
 
-
 def main():
     # --------------------------
     # Combined
-    # get_combined_model_latency()
+    # get_combined_model_data_splits()
+    # get_combined_model_accuracy_slow()
+    get_combined_model_accuracy()
     # --------------------------
     # Simple 
-    trained_simple_all_digit_model = tf.keras.models.load_model('./models/trained_simple_all_digit_model')
-    print('Simple')
-    get_times_and_accuracies(trained_simple_all_digit_model)
+    # trained_simple_all_digit_model = tf.keras.models.load_model('./models/trained_simple_all_digit_model')
+    # print('Simple')
+    # get_times_and_accuracies(trained_simple_all_digit_model)
     # ---------------------------
     # Complex
-    trained_complex_all_digit_model = tf.keras.models.load_model('./models/trained_complex_all_digit_model')
-    print('Complex')
-    get_times_and_accuracies(trained_complex_all_digit_model)
+    # trained_complex_all_digit_model = tf.keras.models.load_model('./models/trained_complex_all_digit_model')
+    # print('Complex')
+    # get_times_and_accuracies(trained_complex_all_digit_model)
 
 if __name__ == '__main__':
     main()
