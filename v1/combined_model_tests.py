@@ -18,7 +18,7 @@ def test_combined():
     '''
     x_train, y_train, x_test, y_test = helpers.get_data()
 
-    confidence_values = np.arange(0.1, 1.1, 0.1)
+    confidence_values = np.arange(0, 1.1, 0.1)
 
     times = []
     accuracies = []
