@@ -18,7 +18,7 @@ def test_combined():
     '''
     x_train, y_train, x_test, y_test = helpers.get_data()
 
-    confidence_values = np.arange(0.1, 1, 0.1)
+    confidence_values = np.arange(0.1, 1.1, 0.1)
 
     times = []
     accuracies = []
@@ -26,13 +26,10 @@ def test_combined():
     num_epochs = 1
 
     for confidence_value in confidence_values:
-        confidence_value = 0.1
-        print('Confidence value:', confidence_value)
         curr_conf_val_total_time = 0
         curr_conf_val_total_accuracy = 0
 
         for i in range(num_epochs):
-            print('Iteration:', i)
             trained_complex_all_digit_model = tf.keras.models.load_model('./models/trained_complex_all_digit_model_' + str(i))
             trained_simple_all_digit_model = tf.keras.models.load_model('./models/trained_simple_all_digit_model_' + str(i))
 
@@ -50,8 +47,10 @@ def test_combined():
             complex_indices = np.asarray(complex_indices, dtype=np.int64)
 
             complex_inputs = np.take(x_test, complex_indices, axis=0)
-            complex_preds = np.argmax(trained_complex_all_digit_model.predict(complex_inputs), axis=1)
-
+            if complex_inputs.shape[0] == 0:
+                complex_preds = []
+            else:
+                complex_preds = np.argmax(trained_complex_all_digit_model.predict(complex_inputs), axis=1)
             # -----------------------------------
             # Select simple
             simple_indices = np.where(simple_highest_probs >= confidence_value, indices, None)
@@ -76,9 +75,8 @@ def test_combined():
 
         accuracies.append(curr_conf_val_total_accuracy / num_epochs)
         times.append(curr_conf_val_total_time / num_epochs)
-        print(accuracies, times)
         
-    print('--------------------')
+    print('Combined --------------------')
     print('Accuracies:', accuracies)
     print('Times:', times)
     
@@ -291,12 +289,12 @@ def main():
     test_combined()
     # --------------------------
     # Simple 
-    # print('Simple --------------------------------')
-    # get_times_and_accuracies()
+    print('Simple --------------------------------')
+    get_times_and_accuracies()
     # ---------------------------
     # Complex
-    # print('Complex --------------------------------')
-    # get_times_and_accuracies(simple=False)
+    print('Complex --------------------------------')
+    get_times_and_accuracies(simple=False)
 
 if __name__ == '__main__':
     main()
