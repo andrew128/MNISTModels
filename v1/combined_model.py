@@ -18,6 +18,8 @@ class CombinedModel():
         self.time_conf_val_trendline_coef = [1.27, -0.624, 0.342]
 
     def get_best_potential_accuracy(self, confidence_value):
+        if confidence_value > 1:
+            return 0.9737
         return 0.915 - 0.0884 * confidence_value + 0.375 * (confidence_value**2)\
             - 0.23 * (confidence_value**3)
 
@@ -27,10 +29,13 @@ class CombinedModel():
         '''
         if max_time < self.lower_time_bound:
             print('Error: max_time given below lowest possible time')
+            return None
 
         deep_copy_coef = np.copy(self.time_conf_val_trendline_coef)
         deep_copy_coef[deep_copy_coef.shape[0] - 1] -= max_time
         confidence_value = np.amax(np.roots(deep_copy_coef).real)
+
+        print('Best Potential Accuracy:', self.get_best_potential_accuracy(confidence_value))
 
         return self.predict_probs_conf(inputs, confidence_value)
 
@@ -71,6 +76,9 @@ class CombinedModel():
         return combined_preds
 
     def evaluate_time(self, inputs, labels, max_time):
+        if max_time < self.lower_time_bound:
+            print('Error: max_time given below lowest possible time')
+            return None
         preds = self.predict_probs_time(inputs, max_time)
         return tf.reduce_mean(tf.cast(tf.equal(preds, labels), tf.float32)).numpy()
 
@@ -82,7 +90,7 @@ def main():
     x_train, y_train, x_test, y_test = helpers.get_data()
     model = CombinedModel()
 
-    times = np.arange(0.26, 2, 0.1)
+    times = np.arange(0.26, 1, 0.1)
     for single_time in times:
         before_time = time.time()
         accuracy = model.evaluate_time(x_test, y_test, single_time)
