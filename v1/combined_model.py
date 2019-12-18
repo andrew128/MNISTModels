@@ -13,11 +13,13 @@ class CombinedModel():
     def __init__(self):
         self.trained_complex_all_digit_model = tf.keras.models.load_model('./models/trained_complex_all_digit_model')
         self.trained_simple_all_digit_model = tf.keras.models.load_model('./models/trained_simple_all_digit_model')
-        self.lower_time_bound = 0.36
 
-        self.a = 1.27
-        self.b = -0.624
-        self.c = 0.342
+        self.lower_time_bound = 0.36
+        self.time_conf_val_trendline_coef = [1.27, -0.624, 0.342]
+
+    def get_best_potential_accuracy(self, confidence_value):
+        return 0.915 - 0.0884 * confidence_value + 0.375 * (confidence_value**2)\
+            - 0.23 * (confidence_value**3)
 
     def predict_probs_time(self, inputs, max_time):
         '''
@@ -25,14 +27,10 @@ class CombinedModel():
         '''
         if max_time < self.lower_time_bound:
             print('Error: max_time given below lowest possible time')
-    
-        new_c = self.c - max_time
-        discriminant = (self.b**2) - (4 * self.a * new_c)
 
-        root1 = (-self.b - cmath.sqrt(discriminant)) / (2 * self.a)
-        root2 = (-self.b + cmath.sqrt(discriminant)) / (2 * self.a)
-
-        confidence_value = max(root1.real, root2.real)
+        deep_copy_coef = np.copy(self.time_conf_val_trendline_coef)
+        deep_copy_coef[deep_copy_coef.shape[0] - 1] -= max_time
+        confidence_value = np.amax(np.roots(deep_copy_coef).real)
 
         return self.predict_probs_conf(inputs, confidence_value)
 
