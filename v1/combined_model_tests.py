@@ -188,7 +188,7 @@ def get_combined_model_accuracy(confidence_bound=0.56):
     print('===========================')
 
     
-def get_combined_model_data_splits():
+def get_combined_model_data_splits(step=0.1):
     '''
     Prints arrays where each index contains the times and accuracies of the combined model for a given data split.
     '''
@@ -199,16 +199,18 @@ def get_combined_model_data_splits():
     combined_times = []
     combined_accuracies = []
 
-    data_splits = np.arange(0.1, 1, 0.1) # [0.1, 0.9]
+    data_splits = np.arange(0.1, 1, step) # [0.1, 0.9]
 
     # For each test split, run simple, complex, and combined predictions.
     for data_split in data_splits:
+        print('Data Split:', data_split)
 
         total_combined_time = 0
         total_combined_accuracy = 0
 
         num_epochs = 10
         for i in range(num_epochs):
+            print(' Epoch:', i)
             # Shuffle data
             indices = tf.random.shuffle(tf.range(y_test.shape[0]))
             x_test = tf.gather(x_test, indices)

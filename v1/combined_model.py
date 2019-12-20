@@ -4,7 +4,6 @@ import tensorflow as tf
 from scipy import stats
 import pickle
 import time
-import cmath
 
 import helper_funcs as helpers
 from models import *
@@ -35,6 +34,7 @@ class CombinedModel():
         deep_copy_coef[deep_copy_coef.shape[0] - 1] -= max_time
         confidence_value = np.amax(np.roots(deep_copy_coef).real)
 
+        print('Confidence Value:', confidence_value)
         print('Best Potential Accuracy:', self.get_best_potential_accuracy(confidence_value))
 
         return self.predict_probs_conf(inputs, confidence_value)
