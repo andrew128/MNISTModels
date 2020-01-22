@@ -14,11 +14,12 @@ from nets import BaseNet
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
+    loss_fn = nn.CrossEntropyLoss()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = F.nll_loss(output, target)
+        loss= loss_fn(output, target)
         loss.backward()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
