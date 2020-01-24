@@ -8,7 +8,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-from nets import BaseNet
+from nets.BaseNet import BaseNet
 
 # this framework was taken from https://github.com/pytorch/examples/blob/master/mnist/main.py
 
