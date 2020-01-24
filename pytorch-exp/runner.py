@@ -8,7 +8,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-from nets.BaseNet import BaseNet
+from nets.SimpleNet import SimpleNet
 
 # this framework was taken from https://github.com/pytorch/examples/blob/master/mnist/main.py
 
@@ -89,7 +89,7 @@ def main():
                        ])),
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
-    model = BaseNet().to(device)
+    model = SimpleNet().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     # scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)

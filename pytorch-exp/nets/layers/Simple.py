@@ -8,7 +8,7 @@ from nets.layers.Output import Output
 # 1 conv layer
 class Simple(nn.Module):
     def __init__(self):
-        super(BaseNet, self).__init__()
+        super(Simple, self).__init__()
 
         input_channels = 1
         self.conv1 = nn.Conv2d(input_channels, 32, 3)
