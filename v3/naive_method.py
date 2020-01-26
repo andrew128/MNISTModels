@@ -13,9 +13,6 @@ def get_naive_method_times_and_accuracies(model_1, model_2, x_test, y_test, spli
     Time and accuracy for split i is i model_1, 1 - i model_2.
     Time and accuracy for each split is the mean over 10 epochs.
     '''
-    # x_train, y_train, x_test, y_test = helpers.get_data()
-    # trained_complex_all_digit_model = tf.keras.models.load_model('./models/trained_complex_all_digit_model')
-    # trained_simple_all_digit_model = tf.keras.models.load_model('./models/trained_simple_all_digit_model')
 
     y_test = tf.squeeze(y_test)
 
@@ -24,7 +21,6 @@ def get_naive_method_times_and_accuracies(model_1, model_2, x_test, y_test, spli
 
     # For each test split, run combined predictions.
     for data_split in splits:
-        # data_split = 0.1
         print('Data Split:', data_split)
 
         total_combined_time = 0
@@ -41,49 +37,27 @@ def get_naive_method_times_and_accuracies(model_1, model_2, x_test, y_test, spli
             # Split data
             split_index = tf.cast(data_split * y_test.shape[0], tf.int32)
 
-            # print(split_index)
-            # Booleans to indicate whether models have any input data based on split
-            # simple_empty = False
-            # complex_empty = False
-            # if split_index == 0:
-            #     complex_empty = True
-            # elif split_index == y_test.shape[0]:
-            #     simple_empty =True
-
-            # if not simple_empty:
-            print('Split index', split_index)
+            # print('Split index', split_index)
             simple_x = x_test[:split_index]
             simple_y = y_test[:split_index]
 
-            # print(simple_x.shape)
-            # if not complex_empty:
             complex_x = x_test[split_index:]
             complex_y = y_test[split_index:]
-
-            # print(complex_x.shape)
 
             # Combined
             before_time = time.time()
 
             # Complex portion
-            # if not complex_empty:
             if complex_x.shape[0] != 0:
                 complex_probs = model_2.predict(complex_x)
                 complex_preds = complex_probs.argmax(axis=1)
                 complex_output = tf.equal(complex_preds, complex_y)
+
             # Simple portion
-            # if not simple_empty:
             if simple_x.shape[0] != 0:
                 simple_probs = model_1.predict(simple_x)
                 simple_preds = simple_probs.argmax(axis=1)
                 simple_output = tf.equal(simple_preds, simple_y)
-
-            # print('inputs', simple_x.shape, complex_x.shape)
-            # print('labels', simple_y.shape, complex_y.shape)
-            # print(complex_y[:10])
-            # print('probs', simple_probs.shape, complex_probs.shape)
-            # print('preds', simple_preds.shape, complex_preds.shape)
-            # print('output', simple_output.shape, complex_output.shape)
 
             # Combined
             if simple_x.shape[0] != 0 and complex_x.shape[0] != 0:
