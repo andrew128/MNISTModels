@@ -39,8 +39,8 @@ def get_trained_l3_all_digit_model(inputs, labels):
 '''
 L2
 '''
-def get_untrained_l2_all_digit_model():
-    input_shape = (28, 28, 1)
+def get_untrained_l2_all_digit_model(input_shape):
+    # input_shape = (28, 28, 1)
 
     # Creating a Sequential Model and adding the layers
     model = Sequential()
@@ -55,7 +55,7 @@ def get_untrained_l2_all_digit_model():
                 metrics=['accuracy'])
     return model
 
-def get_trained_l2_all_digit_model(inputs, labels):
+def get_trained_l2_all_digit_model(inputs, labels, input_shape):
     model = get_untrained_l2_all_digit_model()
     model.fit(x=inputs,y=labels, epochs=1)
     return model

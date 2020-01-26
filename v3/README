@@ -1,0 +1,8 @@
+Generalizes 2 Model work to take in different input datasets.
+Most of code taken from previous version folders.
+Generalized code:
+- Naive method and evaluation (2 models)
+    - Time and accuracy vs split percentage
+- Confidence value method (2 models)
+- Combining Models using Confidence Value Method given Time Constraint
+

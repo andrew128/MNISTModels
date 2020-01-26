@@ -168,17 +168,19 @@ def view_3d(splits, z, accuracies=True):
 
 def main():
     # print('Calculating splits...')
-    splits = get_percentage_splits(increment=0.1)
+    # splits = get_percentage_splits(increment=0.1)
+    # np.save('splits', splits)
     # print('Calculating accuracies...')
-    accuracies, times = get_accuracies_and_times(splits)
-    np.save('avg_accuracies_0.1', accuracies)
-    np.save('avg_times_0.1', times)
+    # accuracies, times = get_accuracies_and_times(splits)
+    # np.save('avg_accuracies_0.1', accuracies)
+    # np.save('avg_times_0.1', times)
 
-    # accuracies = np.load('accuracies_0.1.npy')
-    # times = np.load('times_0.1.npy')
-    print(times) 
+    splits = np.load('splits.npy')
+    accuracies = np.load('accuracies_0.1.npy')
+    times = np.load('times_0.1.npy')
+    # print(times) 
     view_3d(splits, accuracies)
-    view_3d(splits, times, accuracies=False)
+    # view_3d(splits, times, accuracies=False)
 
 if __name__ == "__main__":
     main()
