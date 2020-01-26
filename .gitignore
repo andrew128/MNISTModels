@@ -1,1 +1,7 @@
 pytorch-exp/venv/
+*__pycache__*
+researchEnv
+.*
+*.npy
+*.pyc
+./v3/models
