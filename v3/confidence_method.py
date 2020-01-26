@@ -18,6 +18,9 @@ def test_combined():
 
     y_test = tf.squeeze(y_test)
 
+    x_test = x_test[:5000]
+    y_test = y_test[:5000]
+
     confidence_values = np.arange(0, 1.1, 0.1)
 
     times = []
