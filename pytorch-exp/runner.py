@@ -1,4 +1,4 @@
-#/usr/bin/python3
+#!/usr/local/bin/python
 from __future__ import print_function
 import argparse
 import torch
@@ -19,9 +19,11 @@ def train(args, model, device, train_loader, optimizer, epoch):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss= loss_fn(output, target)
+
+        loss = loss_fn(output, target)
         loss.backward()
         optimizer.step()
+
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -88,18 +90,37 @@ def main():
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
-
-    model = SimpleNet().to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    
+    train_models(device, args, train_loader, test_loader)
+    
+def train_models(device, args, train_loader, test_loader):
+    conv1_model = SimpleNet().to(device)
+    optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
 
     # scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch)
-        test(args, model, device, test_loader)
+        train(args, conv1_model, device, train_loader, optimizer, epoch)
+        test(args, conv1_model, device, test_loader)
         # scheduler.step()
 
     if args.save_model:
-        torch.save(model.state_dict(), "mnist_cnn.pt")
+        torch.save(conv1_model.state_dict(), "conv1_model.pt")
+    
+    # see if model needs to be taken from device 
+    # (may not need to be in cpu, but probably gpu)
+    # conv1_layer = conv1_model.get_conv_layers()
+    # for param in conv1_layer.features.parameters():
+    #     param.requires_grad = False
+    
+    # # build conv2 model with 
+    # conv2_model = #TODO
+
+    # for epoch in range(1, args.epochs + 1):
+    #     train(args, conv2_model, device, train_loader, optimizer, epoch)
+    #     test(args, conv2_model, device, test_loader)
+
+    # if args.save_model:
+    #     torch.save(conv2_model.state_dict(), "conv2_model.pt")
 
 
 if __name__ == '__main__':

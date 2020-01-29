@@ -3,14 +3,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from nets.layers.convs.Conv1 import Conv1
+from nets.layers.convs.ConvLayer import ConvLayer
 from nets.layers.Output import Output
 
 class SimpleNet(nn.Module):
     def __init__(self):
         super(SimpleNet, self).__init__()
 
-        self.conv1 = Conv1()
+        self.conv1 = ConvLayer(1, 32)
         self.simple_output = Output(5408)
 
     def forward(self, x):
@@ -19,7 +19,7 @@ class SimpleNet(nn.Module):
         return x
     
     def get_conv_layers():
-        return self.simple_conv
+        return self.conv1
     
     def get_output_layers():
         return self.simple_output
