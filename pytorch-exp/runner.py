@@ -8,7 +8,9 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-from nets.SimpleNet import SimpleNet
+from nets.Conv1Net import Conv1Net
+from nets.Conv2Net import Conv2Net
+from nets.layers.convs.ConvLayer import ConvLayer
 
 # this framework was taken from https://github.com/pytorch/examples/blob/master/mnist/main.py
 
@@ -54,8 +56,8 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=14, metavar='N',
-                        help='number of epochs to train (default: 14)')
+    parser.add_argument('--epochs', type=int, default=1, metavar='N',
+                        help='number of epochs to train (default: 1)')
     parser.add_argument('--lr', type=float, default=3e-4, metavar='LR',
                         help='learning rate (default: 1.0)')
     parser.add_argument('--gamma', type=float, default=0.7, metavar='M',
@@ -94,33 +96,37 @@ def main():
     train_models(device, args, train_loader, test_loader)
     
 def train_models(device, args, train_loader, test_loader):
-    conv1_model = SimpleNet().to(device)
+    conv1_model = Conv1Net().to(device)
     optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
-
     # scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     for epoch in range(1, args.epochs + 1):
         train(args, conv1_model, device, train_loader, optimizer, epoch)
         test(args, conv1_model, device, test_loader)
         # scheduler.step()
-
+    
     if args.save_model:
         torch.save(conv1_model.state_dict(), "conv1_model.pt")
-    
-    # see if model needs to be taken from device 
-    # (may not need to be in cpu, but probably gpu)
-    # conv1_layer = conv1_model.get_conv_layers()
-    # for param in conv1_layer.features.parameters():
-    #     param.requires_grad = False
-    
-    # # build conv2 model with 
-    # conv2_model = #TODO
 
-    # for epoch in range(1, args.epochs + 1):
-    #     train(args, conv2_model, device, train_loader, optimizer, epoch)
-    #     test(args, conv2_model, device, test_loader)
+    # save the conv weights / bias
+    torch.save({'conv.weight': conv1_model.state_dict()['conv1.conv.weight'], 
+                'conv.bias': conv1_model.state_dict()['conv1.conv.bias']}, './tmp/conv1_weights.pt')
+    saved_weights = torch.load('./tmp/conv1_weights.pt')
 
-    # if args.save_model:
-    #     torch.save(conv2_model.state_dict(), "conv2_model.pt")
+    conv1_new = ConvLayer(1, 32)
+    conv1_new.load_state_dict(saved_weights)
+
+    for param in conv1_new.parameters():
+        param.requires_grad = False
+
+    conv2_model = Conv2Net([conv1_new]).to(device)
+    optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
+
+    for epoch in range(1, args.epochs + 1):
+        train(args, conv2_model, device, train_loader, optimizer, epoch)
+        test(args, conv2_model, device, test_loader)
+
+    if args.save_model:
+        torch.save(conv2_model.state_dict(), "conv2_model.pt")
 
 
 if __name__ == '__main__':

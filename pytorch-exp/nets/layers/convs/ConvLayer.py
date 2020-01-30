@@ -7,12 +7,15 @@ from nets.layers.Output import Output
 
 # ConvLayer w/ max pooling
 class ConvLayer(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size = 3):
+    def __init__(self, in_channels, out_channels, kernel_size = 3, prev_convs = []):
         super(ConvLayer, self).__init__()
 
-        self.conv1 = nn.Conv2d(in_channels, out_channels, 3)
+        self.conv = nn.Conv2d(in_channels, out_channels, 3)
+        self.prev_convs = prev_convs
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = F.max_pool2d(x, 2)
+        for c in self.prev_convs:
+            x = c(x)
+        x = self.conv(x)
         return x
+        

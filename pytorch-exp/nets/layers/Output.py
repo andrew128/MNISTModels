@@ -22,6 +22,7 @@ class Output(nn.Module):
         self.dropout1 = nn.Dropout2d(dropout)
     
     def forward(self, x):
+        x = F.max_pool2d(x, 2)
         x = self.flatten(x)
         x = self.fc1(x)
         x = F.relu(x)
