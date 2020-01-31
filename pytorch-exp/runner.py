@@ -35,13 +35,13 @@ def train(args, model, device, train_loader, optimizer, epoch):
         pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
         correct += pred.eq(target.view_as(pred)).sum().item()
 
-        if batch_idx % args.log_interval == 0:
+        if batch_idx % args.log_interval == 0 and args.verbose_log:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss / args.batch_size))
     
     total_training_loss /= len(train_loader.dataset)
-    print('Training set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    print('Training set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
         total_training_loss, correct, len(train_loader.dataset), 
         100. * correct / len(train_loader.dataset)))
 
@@ -58,7 +58,7 @@ def test(args, model, device, test_loader):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
 
@@ -81,11 +81,14 @@ def main():
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
+    parser.add_argument('--verbose-log', action='store_true', default=False, 
+                        help='set true to see stats for each log-interval')
 
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
     parser.add_argument('--run-id', default='',
                         help='save file identifier for runs')
+
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
