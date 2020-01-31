@@ -8,7 +8,7 @@ from nets.layers.Output import Output
 
 # ConvLayer w/ max pooling
 # functions as intermediate layer
-class Conv2Net(nn.Module):
+class ConvStackerNet(nn.Module):
     def __init__(self, prev_convs):
         super(Conv2Net, self).__init__()
 

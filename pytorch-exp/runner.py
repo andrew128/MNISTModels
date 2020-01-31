@@ -10,7 +10,7 @@ from torch.optim.lr_scheduler import StepLR
 
 from nets.BaseNet import BaseNet
 from nets.Conv1Net import Conv1Net
-from nets.Conv2Net import Conv2Net
+from nets.ConvStackerNet import ConvStackerNet
 from nets.layers.convs.ConvLayer import ConvLayer
 
 # this framework was taken from https://github.com/pytorch/examples/blob/master/mnist/main.py
