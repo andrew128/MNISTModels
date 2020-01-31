@@ -128,11 +128,9 @@ def train_models(device, args, train_loader, test_loader):
     print('------Conv 1 Model------')
     conv1_model = Conv1Net().to(device)
     optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
-    # scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     for epoch in range(1, args.epochs + 1):
         train(args, conv1_model, device, train_loader, optimizer, epoch)
         test(args, conv1_model, device, test_loader)
-        # scheduler.step()
     
     if args.save_model:
         torch.save(conv1_model.state_dict(), "./saved_models/conv1_model-" + args.run_id + ".pt")
@@ -158,7 +156,6 @@ def train_models(device, args, train_loader, test_loader):
 
     if args.save_model:
         torch.save(conv2_model.state_dict(), "./saved_models/conv2_model-" + args.run_id + ".pt")
-
 
 if __name__ == '__main__':
     main()
