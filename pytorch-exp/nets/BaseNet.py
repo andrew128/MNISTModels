@@ -12,8 +12,9 @@ class BaseNet(nn.Module):
 
         input_channels = 1
         self.conv1 = nn.Conv2d(input_channels, 32, 3)
+        self.conv2 = nn.Conv2d(32, 64, 3, 1)
 
-        self.fc1 = nn.Linear(5408, 128)
+        self.fc1 = nn.Linear(9216, 128)
         self.fc2 = nn.Linear(128, 10)
 
         self.flatten = Flatten()
@@ -22,6 +23,8 @@ class BaseNet(nn.Module):
     # this model architecture follows v0 all_digit_model.py
     def forward(self, x):
         x = self.conv1(x)
+        x = F.relu(x)
+        x = self.conv2(x)
         x = F.max_pool2d(x, 2)
         x = self.flatten(x)
         x = self.fc1(x)

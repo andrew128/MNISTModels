@@ -8,6 +8,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
+from nets.BaseNet import BaseNet
 from nets.Conv1Net import Conv1Net
 from nets.Conv2Net import Conv2Net
 from nets.layers.convs.ConvLayer import ConvLayer
@@ -110,10 +111,21 @@ def main():
     train_models(device, args, train_loader, test_loader)
     
 def train_models(device, args, train_loader, test_loader):
+    print('------Full Model------')
+    full_model = BaseNet().to(device)
+    optimizer = torch.optim.Adam(full_model.parameters(), lr=args.lr)
+
+    for epoch in range(1, args.epochs + 1):
+        train(args, full_model, device, train_loader, optimizer, epoch)
+        test(args, full_model, device, test_loader)
+    
+    if args.save_model:
+        torch.save(full_model.state_dict(), "./saved_models/full-model-" + args.run_id + ".pt")
+
+    print('------Conv 1 Model------')
     conv1_model = Conv1Net().to(device)
     optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
     # scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
-    print('------Conv 1 Model------')
     for epoch in range(1, args.epochs + 1):
         train(args, conv1_model, device, train_loader, optimizer, epoch)
         test(args, conv1_model, device, test_loader)
@@ -127,6 +139,7 @@ def train_models(device, args, train_loader, test_loader):
                 'conv.bias': conv1_model.state_dict()['conv1.conv.bias']}, './tmp/conv1_weights.pt')
     saved_weights = torch.load('./tmp/conv1_weights.pt')
 
+    print('------Conv 2 Model------')
     conv1_new = ConvLayer(1, 32)
     conv1_new.load_state_dict(saved_weights)
 
@@ -136,7 +149,6 @@ def train_models(device, args, train_loader, test_loader):
     conv2_model = Conv2Net([conv1_new]).to(device)
     optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
 
-    print('------Conv 2 Model------')
     for epoch in range(1, args.epochs + 1):
         train(args, conv2_model, device, train_loader, optimizer, epoch)
         test(args, conv2_model, device, test_loader)
