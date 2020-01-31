@@ -71,6 +71,8 @@ def main():
 
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
+    parser.add_argument('--run-id', default='',
+                        help='save file identifier for runs')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -99,13 +101,15 @@ def train_models(device, args, train_loader, test_loader):
     conv1_model = Conv1Net().to(device)
     optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
     # scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
-    for epoch in range(1, args.epochs + 1):
-        train(args, conv1_model, device, train_loader, optimizer, epoch)
-        test(args, conv1_model, device, test_loader)
-        # scheduler.step()
+    # for epoch in range(1, args.epochs + 1):
+    #     train(args, conv1_model, device, train_loader, optimizer, epoch)
+    #     test(args, conv1_model, device, test_loader)
+    #     # scheduler.step()
     
     if args.save_model:
-        torch.save(conv1_model.state_dict(), "conv1_model.pt")
+        torch.save(conv1_model.state_dict(), "./saved_models/conv1_model-" + args.run_id + ".pt")
+
+    return
 
     # save the conv weights / bias
     torch.save({'conv.weight': conv1_model.state_dict()['conv1.conv.weight'], 
@@ -126,7 +130,7 @@ def train_models(device, args, train_loader, test_loader):
         test(args, conv2_model, device, test_loader)
 
     if args.save_model:
-        torch.save(conv2_model.state_dict(), "conv2_model.pt")
+        torch.save(conv2_model.state_dict(), "./saved_models/conv2_model-" + args.run_id + ".pt")
 
 
 if __name__ == '__main__':
