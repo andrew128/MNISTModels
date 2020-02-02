@@ -9,7 +9,8 @@ from nets.layers.Output import Output
 # ConvLayer w/ max pooling
 # functions as intermediate layer
 class ConvStackerNet(nn.Module):
-    def __init__(self, prev_convs):
+    def __init__(self, prev_convs, last_conv_in_channels,
+     last_conv_out_channels, fc_layer_neurons):
         super(ConvStackerNet, self).__init__()
 
         self.prev_convs = prev_convs
@@ -19,8 +20,8 @@ class ConvStackerNet(nn.Module):
             exec("self.prev_layer" + index + " = prev_convs[" + index + "]")
             exec("self.my_prev_convs.append(self.prev_layer" + index + ")")
 
-        self.last_conv = ConvLayer(32, 64)
-        self.simple_output = Output(9216)
+        self.last_conv = ConvLayer(last_conv_in_channels, last_conv_out_channels)
+        self.simple_output = Output(fc_layer_neurons)
 
     def forward(self, x):
         for i in range(len(self.my_prev_convs)):

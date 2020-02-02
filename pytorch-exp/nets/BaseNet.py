@@ -5,20 +5,21 @@ import torch.nn.functional as F
 
 from nets.layers.Flatten import Flatten
 
-# full simple 1 convolutional model
+# full convolutional model. 2 convolutions, used for benchmarking.
 class BaseNet(nn.Module):
-    def __init__(self):
+    def __init__(self, input_channels, middle_channels, final_channels, fc_layer_big, fc_layer_small,
+     num_classes = 10, kernel_size = 3, dropout = 0.2):
         super(BaseNet, self).__init__()
 
         input_channels = 1
-        self.conv1 = nn.Conv2d(input_channels, 32, 3)
-        self.conv2 = nn.Conv2d(32, 64, 3, 1)
+        self.conv1 = nn.Conv2d(input_channels, middle_channels, kernel_size)
+        self.conv2 = nn.Conv2d(middle_channels, final_channels, kernel_size, 1)
 
-        self.fc1 = nn.Linear(9216, 128)
-        self.fc2 = nn.Linear(128, 10)
+        self.fc1 = nn.Linear(fc_layer_big, fc_layer_small)
+        self.fc2 = nn.Linear(fc_layer_small, num_classes)
 
         self.flatten = Flatten()
-        self.dropout1 = nn.Dropout2d(0.2)
+        self.dropout1 = nn.Dropout2d(dropout)
 
     # this model architecture follows v0 all_digit_model.py
     def forward(self, x):
