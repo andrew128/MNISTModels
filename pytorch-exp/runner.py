@@ -78,7 +78,7 @@ def main():
                         help='Learning rate step gamma (default: 0.7)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
-    parser.add_argument('--seed', type=int, default=3, metavar='S',
+    parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
@@ -93,7 +93,7 @@ def main():
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
-    torch.manual_seed(args.seed)
+    # torch.manual_seed(args.seed)
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
@@ -120,8 +120,15 @@ def train_models(device, args, train_loader, test_loader):
     optimizer = torch.optim.Adam(full_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
+        print('--Epoch ' + str(epoch) + '--')
+
+        start = time.time()
         train(args, full_model, device, train_loader, optimizer, epoch)
+        print('Training time: ' + str(time.time() - start))
+
+        start = time.time()
         test(args, full_model, device, test_loader)
+        print('Testing time: ' + str(time.time() - start))
     
     if args.save_model:
         torch.save(full_model.state_dict(), "./saved_models/full-model-" + args.run_id + ".pt")
@@ -130,8 +137,15 @@ def train_models(device, args, train_loader, test_loader):
     conv1_model = Conv1Net().to(device)
     optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
     for epoch in range(1, args.epochs + 1):
+        print('--Epoch ' + str(epoch) + '--')
+
+        start = time.time()
         train(args, conv1_model, device, train_loader, optimizer, epoch)
+        print('Training time: ' + str(time.time() - start))        
+        
+        start = time.time()
         test(args, conv1_model, device, test_loader)
+        print('Testing time: ' + str(time.time() - start))
     
     if args.save_model:
         torch.save(conv1_model.state_dict(), "./saved_models/conv1_model-" + args.run_id + ".pt")
@@ -152,8 +166,15 @@ def train_models(device, args, train_loader, test_loader):
     optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
+        print('--Epoch ' + str(epoch) + '--')
+
+        start = time.time()
         train(args, conv2_model, device, train_loader, optimizer, epoch)
+        print('Training time: ' + str(time.time() - start))        
+        
+        start = time.time()
         test(args, conv2_model, device, test_loader)
+        print('Testing time: ' + str(time.time() - start))
 
     if args.save_model:
         torch.save(conv2_model.state_dict(), "./saved_models/conv2_model-" + args.run_id + ".pt")
