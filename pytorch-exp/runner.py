@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 from __future__ import print_function
 import argparse
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -77,7 +78,7 @@ def main():
                         help='Learning rate step gamma (default: 0.7)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
-    parser.add_argument('--seed', type=int, default=1, metavar='S',
+    parser.add_argument('--seed', type=int, default=3, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
@@ -147,7 +148,7 @@ def train_models(device, args, train_loader, test_loader):
     for param in conv1_new.parameters():
         param.requires_grad = False
 
-    conv2_model = Conv2Net([conv1_new]).to(device)
+    conv2_model = ConvStackerNet([conv1_new]).to(device)
     optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):

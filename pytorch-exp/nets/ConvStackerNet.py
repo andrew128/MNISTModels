@@ -10,7 +10,7 @@ from nets.layers.Output import Output
 # functions as intermediate layer
 class ConvStackerNet(nn.Module):
     def __init__(self, prev_convs):
-        super(Conv2Net, self).__init__()
+        super(ConvStackerNet, self).__init__()
 
         self.prev_convs = prev_convs
         self.my_prev_convs = []
@@ -25,6 +25,7 @@ class ConvStackerNet(nn.Module):
     def forward(self, x):
         for i in range(len(self.my_prev_convs)):
             x = self.my_prev_convs[i](x)
+            x = F.relu(x)
         x = self.last_conv(x)
         x = self.simple_output(x)
         return x
