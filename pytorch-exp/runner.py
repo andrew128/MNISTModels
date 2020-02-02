@@ -116,9 +116,10 @@ def main():
                         ])),
             batch_size=args.test_batch_size, shuffle=True, **kwargs)
     
-        train_mnist_models(device, args, train_loader, test_loader)
+        mnist_wrapper(device, args, train_loader, test_loader)
 
     elif args.dataset == 'cifar':
+        assert(False) # training / testing for cifar hasn't been done yet
         train_loader = torch.utils.data.DataLoader(
             datasets.CIFAR10('./data', train=True, download=True,
                         transform=transforms.Compose([
@@ -133,41 +134,38 @@ def main():
                         ])),
             batch_size=args.test_batch_size, shuffle=True, **kwargs)
     
-        # train_mnist_models(device, args, train_loader, test_loader)       
+def mnist_wrapper(device, args, train_loader, test_loader):
+    print('------Full Model------')
+    full_model = BaseNet(1, 32, 64, 9216, 128).to(device)
+    optimizer = torch.optim.Adam(full_model.parameters(), lr=args.lr)
 
+    for epoch in range(1, args.epochs + 1):
+        print('--Epoch ' + str(epoch) + '--')
+
+        start = time.time()
+        train(args, full_model, device, train_loader, optimizer, epoch)
+        print('Training time: ' + str(time.time() - start))
+
+        start = time.time()
+        test(args, full_model, device, test_loader)
+        print('Testing time: ' + str(time.time() - start))
     
-def train_mnist_models(device, args, train_loader, test_loader):
-    # print('------Full Model------')
-    # full_model = BaseNet(1, 32, 64, 9216, 128).to(device)
-    # optimizer = torch.optim.Adam(full_model.parameters(), lr=args.lr)
-
-    # for epoch in range(1, args.epochs + 1):
-    #     print('--Epoch ' + str(epoch) + '--')
-
-    #     start = time.time()
-    #     train(args, full_model, device, train_loader, optimizer, epoch)
-    #     print('Training time: ' + str(time.time() - start))
-
-    #     start = time.time()
-    #     test(args, full_model, device, test_loader)
-    #     print('Testing time: ' + str(time.time() - start))
-    
-    # if args.save_model:
-    #     torch.save(full_model.state_dict(), "./saved_models/full-model-" + args.run_id + ".pt")
+    if args.save_model:
+        torch.save(full_model.state_dict(), "./saved_models/full-model-" + args.run_id + ".pt")
 
     print('------Conv 1 Model------')
-    conv1_model = Conv1Net(1, 32, 5408).to(device)
+    conv1_model = Conv1Net(1, 32, [5408, 128, 10]).to(device)
     optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
-    # for epoch in range(1, args.epochs + 1):
-    #     print('--Epoch ' + str(epoch) + '--')
+    for epoch in range(1, args.epochs + 1):
+        print('--Epoch ' + str(epoch) + '--')
 
-    #     start = time.time()
-    #     train(args, conv1_model, device, train_loader, optimizer, epoch)
-    #     print('Training time: ' + str(time.time() - start))        
+        start = time.time()
+        train(args, conv1_model, device, train_loader, optimizer, epoch)
+        print('Training time: ' + str(time.time() - start))        
         
-    #     start = time.time()
-    #     test(args, conv1_model, device, test_loader)
-    #     print('Testing time: ' + str(time.time() - start))
+        start = time.time()
+        test(args, conv1_model, device, test_loader)
+        print('Testing time: ' + str(time.time() - start))
     
     if args.save_model:
         torch.save(conv1_model.state_dict(), "./saved_models/conv1_model-" + args.run_id + ".pt")
@@ -184,7 +182,7 @@ def train_mnist_models(device, args, train_loader, test_loader):
     for param in conv1_new.parameters():
         param.requires_grad = False
 
-    conv2_model = ConvStackerNet([conv1_new], 32, 64, 9216).to(device)
+    conv2_model = ConvStackerNet([conv1_new], 32, 64, [9216, 128, 10]).to(device)
     optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):

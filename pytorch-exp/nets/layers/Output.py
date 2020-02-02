@@ -5,28 +5,34 @@ import torch.nn.functional as F
 
 from nets.layers.Flatten import Flatten
 
+# Fully connected output layer
 class Output(nn.Module):
-    def __init__(self, num_inputs, num_fc_layers = 2, dropout = 0.2):
+    def __init__(self, fc_layer_neurons, dropout = 0.2):
         super(Output, self).__init__()
-
-        self.num_inputs = num_inputs 
-        self.num_fc_layers = num_fc_layers 
 
         self.flatten = Flatten()
 
-        # TODO: loop number of fc layers
-        # TODO: parameterize fc neurons
-        self.fc1 = nn.Linear(num_inputs, 128)
-        self.fc2 = nn.Linear(128, 10)
-
+        # setting up fully connected layers
+        # fc_layer_neurons is an array, and should have at least starting and output neurons
+        assert len(fc_layer_neurons) > 2
+        self.my_fc_layers = []
+        for i in range(len(fc_layer_neurons) - 1):
+            index = str(i)
+            temp_fc = nn.Linear(fc_layer_neurons[i], fc_layer_neurons[i + 1])
+            exec("self.fc" + index + " = temp_fc")
+            exec("self.my_fc_layers.append(self.fc" + index + ")")
+        
         self.dropout1 = nn.Dropout2d(dropout)
     
     def forward(self, x):
         x = F.max_pool2d(x, 2)
         x = self.flatten(x)
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.dropout1(x)
-        x = self.fc2(x)
+        x = self.my_fc_layers[0](x)
+
+        for i in range(1, len(self.my_fc_layers)):
+            x = F.relu(x)
+            x = self.dropout1(x)
+            x = self.my_fc_layers[i](x)
+
         x = F.log_softmax(x, dim=1)
         return x
