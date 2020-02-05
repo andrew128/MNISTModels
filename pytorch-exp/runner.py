@@ -201,45 +201,69 @@ def mnist_wrapper(device, args, train_loader, test_loader):
         torch.save(conv2_model.state_dict(), "./saved_models/mnist-conv2_model-" + args.run_id + ".pt")
 
 def cifar_wrapper(device, args, train_loader, test_loader):
-    print('------Full Model------')
-    full_model = BaseNet(3, 32, 64, 12544, 256).to(device)
-    optimizer = torch.optim.Adam(full_model.parameters(), lr=args.lr)
+    # print('------Full Model------')
+    # full_model = BaseNet(3, 32, 64, 12544, 256).to(device)
+    # optimizer = torch.optim.Adam(full_model.parameters(), lr=args.lr)
+
+    # for epoch in range(1, args.epochs + 1):
+    #     print('--Epoch ' + str(epoch) + '--')
+
+    #     start = time.time()
+    #     train(args, full_model, device, train_loader, optimizer, epoch)
+    #     print('Training time: ' + str(time.time() - start))
+
+    #     start = time.time()
+    #     test(args, full_model, device, test_loader)
+    #     print('Testing time: ' + str(time.time() - start))
+    
+    # if args.save_model:
+    #     torch.save(full_model.state_dict(), "./saved_models/cifar-full_model-" + args.run_id + ".pt")
+
+    print('------Conv 1 Model------')
+    conv1_model = Conv1Net(3, 32, [7200, 256, 10]).to(device)
+    optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
+    for epoch in range(1, args.epochs + 1):
+        print('--Epoch ' + str(epoch) + '--')
+
+        start = time.time()
+        train(args, conv1_model, device, train_loader, optimizer, epoch)
+        print('Training time: ' + str(time.time() - start))        
+        
+        start = time.time()
+        test(args, conv1_model, device, test_loader)
+        print('Testing time: ' + str(time.time() - start))
+    
+    if args.save_model:
+        torch.save(conv1_model.state_dict(), "./saved_models/cifar-conv1_model-" + args.run_id + ".pt")
+
+    # save the conv weights / bias
+    torch.save({'conv.weight': conv1_model.state_dict()['conv1.conv.weight'], 
+                'conv.bias': conv1_model.state_dict()['conv1.conv.bias']}, './tmp/cifar-conv1_weights.pt')
+    saved_weights = torch.load('./tmp/cifar-conv1_weights.pt')
+
+    print('------Conv 2 Model------')
+    conv1_new = ConvLayer(3, 32)
+    conv1_new.load_state_dict(saved_weights)
+
+    for param in conv1_new.parameters():
+        param.requires_grad = False
+
+    conv2_model = ConvStackerNet([conv1_new], 32, 64, [12544, 128, 10]).to(device)
+    optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
         print('--Epoch ' + str(epoch) + '--')
 
         start = time.time()
-        train(args, full_model, device, train_loader, optimizer, epoch)
-        print('Training time: ' + str(time.time() - start))
-
-        start = time.time()
-        test(args, full_model, device, test_loader)
-        print('Testing time: ' + str(time.time() - start))
-    
-    if args.save_model:
-        torch.save(full_model.state_dict(), "./saved_models/cifar-full_model-" + args.run_id + ".pt")
-
-    # print('------Conv 1 Model------')
-    # conv1_model = Conv1Net(1, 32, [5408, 128, 10]).to(device)
-    # optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
-    # for epoch in range(1, args.epochs + 1):
-    #     print('--Epoch ' + str(epoch) + '--')
-
-    #     start = time.time()
-    #     train(args, conv1_model, device, train_loader, optimizer, epoch)
-    #     print('Training time: ' + str(time.time() - start))        
+        train(args, conv2_model, device, train_loader, optimizer, epoch)
+        print('Training time: ' + str(time.time() - start))        
         
-    #     start = time.time()
-    #     test(args, conv1_model, device, test_loader)
-    #     print('Testing time: ' + str(time.time() - start))
-    
-    # if args.save_model:
-    #     torch.save(conv1_model.state_dict(), "./saved_models/cifar-conv1_model-" + args.run_id + ".pt")
+        start = time.time()
+        test(args, conv2_model, device, test_loader)
+        print('Testing time: ' + str(time.time() - start))
 
-    # # save the conv weights / bias
-    # torch.save({'conv.weight': conv1_model.state_dict()['conv1.conv.weight'], 
-    #             'conv.bias': conv1_model.state_dict()['conv1.conv.bias']}, './tmp/conv1_weights.pt')
-    # saved_weights = torch.load('./tmp/cifar-conv1_weights.pt')
+    if args.save_model:
+        torch.save(conv2_model.state_dict(), "./saved_models/cifar-conv2_model-" + args.run_id + ".pt")
 
 if __name__ == '__main__':
     main()
