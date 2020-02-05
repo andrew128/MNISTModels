@@ -4,7 +4,7 @@ import time
 import helper_funcs as helpers
 from models import *
 
-def test_combined():
+def test_combined(simple_model_level, complex_model_level):
     '''
     Gets data for Times and Accuracies vs Confidence value for the combined model.
 
@@ -27,7 +27,7 @@ def test_combined():
     accuracies = []
     percentage_simple_calls = []
 
-    num_epochs = 10
+    num_epochs = 5
 
     for confidence_value in confidence_values:
         print('Confidence Value:', confidence_value)
@@ -36,9 +36,9 @@ def test_combined():
         curr_percentage_simple_calls = 0
 
         for i in range(num_epochs):
-            print('Epoch', i, '/', num_epochs)
-            trained_complex_all_digit_model = tf.keras.models.load_model('./models/l4_cifar10_model' + str(i))
-            trained_simple_all_digit_model = tf.keras.models.load_model('./models/l2_cifar10_model' + str(i))
+            # print('Epoch', i, '/', num_epochs)
+            trained_complex_all_digit_model = tf.keras.models.load_model('./models/l' + str(complex_model_level) + '_cifar10_model' + str(i))
+            trained_simple_all_digit_model = tf.keras.models.load_model('./models/l' + str(simple_model_level) + '_cifar10_model' + str(i))
 
             before_time = time.time()
             # -----------------------------------
@@ -79,7 +79,7 @@ def test_combined():
             # -----------------------------------
             curr_conf_val_total_accuracy += accuracy.numpy()
             curr_conf_val_total_time += duration
-            print('percentage simple', simple_labels.shape[0], y_test.shape[0], simple_labels.shape[0] / y_test.shape[0])
+            # print('percentage simple', simple_labels.shape[0], y_test.shape[0], simple_labels.shape[0] / y_test.shape[0])
             curr_percentage_simple_calls += (simple_labels.shape[0] / y_test.shape[0])
 
         accuracies.append(curr_conf_val_total_accuracy / num_epochs)
@@ -92,7 +92,18 @@ def test_combined():
     print('Percentage Simple', percentage_simple_calls)
 
 def main():
-    test_combined()
+    print(1, 2)
+    test_combined(1, 2)
+    print(1, 3)
+    test_combined(1, 3)
+    print(1, 4)
+    test_combined(1, 4)
+    print(2, 3)
+    test_combined(2, 3)
+    print(2, 4)
+    test_combined(2, 4)
+    print(3, 4)
+    test_combined(3, 4)
 
 if __name__ == '__main__':
     main()

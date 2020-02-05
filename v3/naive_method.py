@@ -12,6 +12,8 @@ def get_naive_method_times_and_accuracies(model_1, model_2, x_test, y_test, spli
 
     Time and accuracy for split i is i model_1, 1 - i model_2.
     Time and accuracy for each split is the mean over 10 epochs.
+
+    model_2 is more complex then model_1.
     '''
 
     y_test = tf.squeeze(y_test)
@@ -28,7 +30,7 @@ def get_naive_method_times_and_accuracies(model_1, model_2, x_test, y_test, spli
 
         num_epochs = 10
         for i in range(num_epochs):
-            print(' Epoch:', i)
+            # print(' Epoch:', i)
             # Shuffle data
             indices = tf.random.shuffle(tf.range(y_test.shape[0]))
             x_test = tf.gather(x_test, indices)
@@ -69,7 +71,7 @@ def get_naive_method_times_and_accuracies(model_1, model_2, x_test, y_test, spli
             combined_accuracy = tf.reduce_mean(tf.cast(combined_output, tf.float32))
 
             after_time = time.time()
-            print(after_time - before_time, combined_accuracy)
+            # print(after_time - before_time, combined_accuracy)
             total_combined_time += after_time - before_time
             total_combined_accuracy += combined_accuracy
 
@@ -113,7 +115,18 @@ def main():
 
     # Get and save inference time and accuracies on test data vs splits data
     splits = np.arange(0, 1.1, 0.1)
+    print('L1 and L2')
+    get_naive_method_times_and_accuracies(l1_model, l2_model, test_images, test_labels, splits)
+    print('L1 and L3')
+    get_naive_method_times_and_accuracies(l1_model, l3_model, test_images, test_labels, splits)
+    print('L1 and L4')
+    get_naive_method_times_and_accuracies(l1_model, l4_model, test_images, test_labels, splits)
+    print('L2 and L3')
+    get_naive_method_times_and_accuracies(l2_model, l3_model, test_images, test_labels, splits)
+    print('L2 and L4')
     get_naive_method_times_and_accuracies(l2_model, l4_model, test_images, test_labels, splits)
+    print('L3 and L4')
+    get_naive_method_times_and_accuracies(l3_model, l4_model, test_images, test_labels, splits)
 
 if __name__ == '__main__':
     main()
