@@ -11,7 +11,6 @@ class BaseNet(nn.Module):
      num_classes = 10, kernel_size = 3, dropout = 0.2):
         super(BaseNet, self).__init__()
 
-        input_channels = 1
         self.conv1 = nn.Conv2d(input_channels, middle_channels, kernel_size)
         self.conv2 = nn.Conv2d(middle_channels, final_channels, kernel_size, 1)
 
