@@ -28,7 +28,7 @@ def get_naive_method_times_and_accuracies(model_1, model_2, x_test, y_test, spli
         total_combined_time = 0
         total_combined_accuracy = 0
 
-        num_epochs = 10
+        num_epochs = 5
         for i in range(num_epochs):
             # print(' Epoch:', i)
             # Shuffle data
@@ -97,10 +97,10 @@ def main():
     # l3_model.save('models/l3_cifar10_model')
     # l4_model.save('models/l4_cifar10_model')
 
-    l1_model = tf.keras.models.load_model('./models/l1_cifar10_model')
-    l2_model = tf.keras.models.load_model('./models/l2_cifar10_model')
-    l3_model = tf.keras.models.load_model('./models/l3_cifar10_model')
-    l4_model = tf.keras.models.load_model('./models/l4_cifar10_model')
+    l1_model = tf.keras.models.load_model('./models/l1_cifar10_model0')
+    l2_model = tf.keras.models.load_model('./models/l2_cifar10_model0')
+    l3_model = tf.keras.models.load_model('./models/l3_cifar10_model0')
+    l4_model = tf.keras.models.load_model('./models/l4_cifar10_model0')
     # print(l4_model.summary())
 
     # print(l1_model.metrics_names)

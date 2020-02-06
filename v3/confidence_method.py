@@ -4,7 +4,7 @@ import time
 import helper_funcs as helpers
 from models import *
 
-def test_combined(simple_model_level, complex_model_level):
+def test_combined(trained_simple_all_digit_model, trained_complex_all_digit_model):
     '''
     Gets data for Times and Accuracies vs Confidence value for the combined model.
 
@@ -37,8 +37,12 @@ def test_combined(simple_model_level, complex_model_level):
 
         for i in range(num_epochs):
             # print('Epoch', i, '/', num_epochs)
-            trained_complex_all_digit_model = tf.keras.models.load_model('./models/l' + str(complex_model_level) + '_cifar10_model' + str(i))
-            trained_simple_all_digit_model = tf.keras.models.load_model('./models/l' + str(simple_model_level) + '_cifar10_model' + str(i))
+            # trained_complex_all_digit_model = tf.keras.models.load_model('./models/l' + str(complex_model_level) + '_cifar10_model'0)
+            # trained_simple_all_digit_model = tf.keras.models.load_model('./models/l' + str(simple_model_level) + '_cifar10_model' + str(i))
+
+            shuffled_indices = tf.random.shuffle(tf.range(y_test.shape[0]))
+            x_test = tf.gather(x_test, shuffled_indices)
+            y_test = tf.gather(y_test, shuffled_indices)
 
             before_time = time.time()
             # -----------------------------------
@@ -92,18 +96,24 @@ def test_combined(simple_model_level, complex_model_level):
     print('Percentage Simple', percentage_simple_calls)
 
 def main():
+
+    l1_model = tf.keras.models.load_model('./models/l1_cifar10_model0')
+    l2_model = tf.keras.models.load_model('./models/l2_cifar10_model0')
+    l3_model = tf.keras.models.load_model('./models/l3_cifar10_model0')
+    l4_model = tf.keras.models.load_model('./models/l4_cifar10_model0')
+
     print(1, 2)
-    test_combined(1, 2)
+    test_combined(l1_model, l2_model)
     print(1, 3)
-    test_combined(1, 3)
+    test_combined(l1_model, l3_model)
     print(1, 4)
-    test_combined(1, 4)
+    test_combined(l1_model, l4_model)
     print(2, 3)
-    test_combined(2, 3)
+    test_combined(l2_model, l3_model)
     print(2, 4)
-    test_combined(2, 4)
+    test_combined(l2_model, l4_model)
     print(3, 4)
-    test_combined(3, 4)
+    test_combined(l3_model, l4_model)
 
 if __name__ == '__main__':
     main()
