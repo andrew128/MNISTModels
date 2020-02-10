@@ -201,23 +201,23 @@ def mnist_wrapper(device, args, train_loader, test_loader):
         torch.save(conv2_model.state_dict(), "./saved_models/mnist-conv2_model-" + args.run_id + ".pt")
 
 def cifar_wrapper(device, args, train_loader, test_loader):
-    # print('------Full Model------')
-    # full_model = BaseNet(3, 32, 64, 12544, 256).to(device)
-    # optimizer = torch.optim.Adam(full_model.parameters(), lr=args.lr)
+    print('------Full Model------')
+    full_model = BaseNet(3, 32, 64, 12544, 256).to(device)
+    optimizer = torch.optim.Adam(full_model.parameters(), lr=args.lr)
 
-    # for epoch in range(1, args.epochs + 1):
-    #     print('--Epoch ' + str(epoch) + '--')
+    for epoch in range(1, args.epochs + 1):
+        print('--Epoch ' + str(epoch) + '--')
 
-    #     start = time.time()
-    #     train(args, full_model, device, train_loader, optimizer, epoch)
-    #     print('Training time: ' + str(time.time() - start))
+        start = time.time()
+        train(args, full_model, device, train_loader, optimizer, epoch)
+        print('Training time: ' + str(time.time() - start))
 
-    #     start = time.time()
-    #     test(args, full_model, device, test_loader)
-    #     print('Testing time: ' + str(time.time() - start))
+        start = time.time()
+        test(args, full_model, device, test_loader)
+        print('Testing time: ' + str(time.time() - start))
     
-    # if args.save_model:
-    #     torch.save(full_model.state_dict(), "./saved_models/cifar-full_model-" + args.run_id + ".pt")
+    if args.save_model:
+        torch.save(full_model.state_dict(), "./saved_models/cifar-full_model-" + args.run_id + ".pt")
 
     print('------Conv 1 Model------')
     conv1_model = Conv1Net(3, 32, [7200, 256, 10]).to(device)
@@ -248,7 +248,7 @@ def cifar_wrapper(device, args, train_loader, test_loader):
     for param in conv1_new.parameters():
         param.requires_grad = False
 
-    conv2_model = ConvStackerNet([conv1_new], 32, 64, [12544, 128, 10]).to(device)
+    conv2_model = ConvStackerNet([conv1_new], 32, 64, [12544, 256, 10]).to(device)
     optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
