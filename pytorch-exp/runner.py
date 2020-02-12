@@ -219,6 +219,7 @@ def cifar_wrapper(device, args, train_loader, test_loader):
     # if args.save_model:
     #     torch.save(full_model.state_dict(), "./saved_models/cifar-full_model-" + args.run_id + ".pt")
 
+    ########### Conv1 Model setup ###########
     # print('------Conv 1 Model------')
     # conv1_model = Conv1Net(3, 32, [7200, 1024, 256, 10]).to(device)
     # optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
@@ -236,34 +237,77 @@ def cifar_wrapper(device, args, train_loader, test_loader):
     # if args.save_model:
     #     torch.save(conv1_model.state_dict(), "./saved_models/cifar-conv1_model-" + args.run_id + ".pt")
 
+
+    # ########### Conv2 Model setup ###########
     # # save the conv weights / bias
     # torch.save({'conv.weight': conv1_model.state_dict()['conv1.conv.weight'], 
     #             'conv.bias': conv1_model.state_dict()['conv1.conv.bias']}, './tmp/cifar-conv1_weights.pt')
     # saved_weights = torch.load('./tmp/cifar-conv1_weights.pt')
 
-    print('------Conv 2 Model------')
+    # print('------Conv 2 Model------') # first layer pretrained
+    # conv1_new = ConvLayer(3, 32)
+    # conv1_new.load_state_dict(saved_weights)
+
+    # for param in conv1_new.parameters():
+    #     param.requires_grad = False
+
+    # conv2_model = ConvStackerNet([conv1_new], 32, 64, [12544, 1024, 256, 10]).to(device)
+    # optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
+
+    # for epoch in range(1, args.epochs + 1):
+    #     print('--Epoch ' + str(epoch) + '--')
+
+    #     start = time.time()
+    #     train(args, conv2_model, device, train_loader, optimizer, epoch)
+    #     print('Training time: ' + str(time.time() - start))        
+        
+    #     start = time.time()
+    #     test(args, conv2_model, device, test_loader)
+    #     print('Testing time: ' + str(time.time() - start))
+
+    # if args.save_model:
+    #     torch.save(conv2_model.state_dict(), "./saved_models/cifar-conv2_model-" + args.run_id + ".pt")
+
+    ########### Conv3 Model setup ###########
+    # save the conv1 weights / bias
+    torch.save({'conv.weight': conv2_model.state_dict()['prev_layer0.conv.weight'], 
+                'conv.bias': conv2_model.state_dict()['prev_layer0.conv.bias']}, './tmp/cifar-conv1_weights.pt')
+    conv1_saved_weights = torch.load('./tmp/cifar-conv1_weights.pt')
+
+    # save the conv2 weights / bias
+    torch.save({'conv.weight': conv2_model.state_dict()['last_conv.conv.weight'], 
+                'conv.bias': conv2_model.state_dict()['last_conv.conv.bias']}, './tmp/cifar-conv2_weights.pt')
+    conv2_saved_weights = torch.load('./tmp/cifar-conv2_weights.pt')
+
+    print('------Conv 3 Model------') # first 2 layers pretrained
     conv1_new = ConvLayer(3, 32)
-    conv1_new.load_state_dict(saved_weights)
+    conv1_new.load_state_dict(conv1_saved_weights)
 
     for param in conv1_new.parameters():
         param.requires_grad = False
 
-    conv2_model = ConvStackerNet([conv1_new], 32, 64, [12544, 1024, 256, 10]).to(device)
+    conv2_new = ConvLayer(32, 64)
+    conv2_new.load_state_dict(conv2_saved_weights)
+
+    for param in conv2_new.parameters():
+        param.requires_grad = False
+
+    conv3_model = ConvStackerNet([conv1_new, conv2_new], 64, 128, [21632, 1024, 256, 10]).to(device)
     optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
         print('--Epoch ' + str(epoch) + '--')
 
         start = time.time()
-        train(args, conv2_model, device, train_loader, optimizer, epoch)
+        train(args, conv3_model, device, train_loader, optimizer, epoch)
         print('Training time: ' + str(time.time() - start))        
         
         start = time.time()
-        test(args, conv2_model, device, test_loader)
+        test(args, conv3_model, device, test_loader)
         print('Testing time: ' + str(time.time() - start))
 
     if args.save_model:
-        torch.save(conv2_model.state_dict(), "./saved_models/cifar-conv2_model-" + args.run_id + ".pt")
+        torch.save(conv3_model.state_dict(), "./saved_models/cifar-conv3_model-" + args.run_id + ".pt")
 
 if __name__ == '__main__':
     main()
