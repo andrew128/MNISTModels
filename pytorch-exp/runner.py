@@ -270,13 +270,13 @@ def cifar_wrapper(device, args, train_loader, test_loader):
 
     ########### Conv3 Model setup ###########
     # save the conv1 weights / bias
-    torch.save({'conv.weight': conv2_model.state_dict()['prev_layer0.conv.weight'], 
-                'conv.bias': conv2_model.state_dict()['prev_layer0.conv.bias']}, './tmp/cifar-conv1_weights.pt')
+    # torch.save({'conv.weight': conv2_model.state_dict()['prev_layer0.conv.weight'], 
+    #             'conv.bias': conv2_model.state_dict()['prev_layer0.conv.bias']}, './tmp/cifar-conv1_weights.pt')
     conv1_saved_weights = torch.load('./tmp/cifar-conv1_weights.pt')
 
     # save the conv2 weights / bias
-    torch.save({'conv.weight': conv2_model.state_dict()['last_conv.conv.weight'], 
-                'conv.bias': conv2_model.state_dict()['last_conv.conv.bias']}, './tmp/cifar-conv2_weights.pt')
+    # torch.save({'conv.weight': conv2_model.state_dict()['last_conv.conv.weight'], 
+    #             'conv.bias': conv2_model.state_dict()['last_conv.conv.bias']}, './tmp/cifar-conv2_weights.pt')
     conv2_saved_weights = torch.load('./tmp/cifar-conv2_weights.pt')
 
     print('------Conv 3 Model------') # first 2 layers pretrained
@@ -293,7 +293,7 @@ def cifar_wrapper(device, args, train_loader, test_loader):
         param.requires_grad = False
 
     conv3_model = ConvStackerNet([conv1_new, conv2_new], 64, 128, [21632, 1024, 256, 10]).to(device)
-    optimizer = torch.optim.Adam(conv2_model.parameters(), lr=args.lr)
+    optimizer = torch.optim.Adam(conv3_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
         print('--Epoch ' + str(epoch) + '--')
