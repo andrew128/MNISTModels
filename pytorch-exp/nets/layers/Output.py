@@ -14,7 +14,7 @@ class Output(nn.Module):
 
         # setting up fully connected layers
         # fc_layer_neurons is an array, and should have at least starting and output neurons
-        assert len(fc_layer_neurons) > 2
+        assert len(fc_layer_neurons) >= 2
         self.my_fc_layers = []
         for i in range(len(fc_layer_neurons) - 1):
             index = str(i)
