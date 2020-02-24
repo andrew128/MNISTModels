@@ -6,6 +6,10 @@ import torch.nn.functional as F
 from nets.layers.Flatten import Flatten
 from nets.layers.Output import Output
 
+import math
+
+e = 2.71828
+
 # basic short circuit model
 # parameterization will happen later, if this even works
 class ShortCircuitNet(nn.Module):
@@ -27,26 +31,42 @@ class ShortCircuitNet(nn.Module):
 
         self.should_short_circuit = True # this is just to easily toggle between the two
 
+        self.write_file = open('execution.txt', 'w')
+
     # this model architecture follows v0 all_digit_model.py
     def forward(self, x):
         x = self.conv1(x)
         x = F.relu(x)
         if self.should_short_circuit:
             y = self.fc1(x)
-            normalized = y * (1 / sum(y[0]))
+            # normalized = y * (1 / sum(y[0]))
+            normalized = torch.pow(e, y)
+            # print(normalized)
             if max(normalized[0]) >= self.confidence_level:
-                return x
+                self.write_file.write('1\n')
+                self.write_file.write(str(max(normalized[0]).item()) + '\n')
+                return y
         
         x = self.conv2(x)
         x = F.relu(x)
         if self.should_short_circuit:
             y = self.fc2(x)
-            normalized = y * (1 / sum(y[0]))
+            # normalized = y * (1 / sum(y[0]))
+            normalized = torch.pow(e, y)
+            # print(normalized)
             if max(normalized[0]) >= self.confidence_level:
-                return x
+                self.write_file.write('2\n')
+                self.write_file.write(str(max(normalized[0]).item()) + '\n')
+                return y
 
         x = self.conv3(x)
         x = F.relu(x)
         x = self.fc3(x)
+        if self.should_short_circuit:
+            # normalized = y * (1 / sum(y[0]))
+            normalized = torch.pow(e, y)
+            # print(normalized)
+            self.write_file.write('3\n')
+            self.write_file.write(str(max(normalized[0]).item()) + '\n')
         return x
 
