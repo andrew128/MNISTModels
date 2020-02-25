@@ -208,10 +208,11 @@ def mnist_wrapper(device, args, train_loader, test_loader):
 def cifar_wrapper(device, args, train_loader, test_loader):
     ## Short Circuit Model ###
     write_file = open('execution.txt', 'w')
-    sc_model = ShortCircuitNet(0.6, write_file=write_file).to(device)
+    sc_model = ShortCircuitNet(0.5, write_file=write_file).to(device)
     optimizer = torch.optim.Adam(sc_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
+        write_file.write('---\n')
         print('--Epoch ' + str(epoch) + '--')
 
         start = time.time()
