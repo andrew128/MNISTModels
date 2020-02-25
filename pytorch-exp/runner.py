@@ -17,7 +17,7 @@ from nets.layers.convs.ConvLayer import ConvLayer
 
 # this framework was taken from https://github.com/pytorch/examples/blob/master/mnist/main.py
 
-def train(args, model, device, train_loader, optimizer, epoch):
+def train(args, model, device, train_loader, optimizer, epoch, write_file = None):
     model.train()
     correct = 0
     total_training_loss = 0
@@ -33,8 +33,12 @@ def train(args, model, device, train_loader, optimizer, epoch):
         # calculating stats
         loss = loss.item()
         total_training_loss += loss
-
         pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+        if write_file:
+            write_file.write('1\n' if pred[0].item() == target.item() else '0\n')
+        # print(output)
+        # print(pred)
+        # print(target)
         correct += pred.eq(target.view_as(pred)).sum().item()
 
         if batch_idx % args.log_interval == 0 and args.verbose_log:
@@ -202,15 +206,16 @@ def mnist_wrapper(device, args, train_loader, test_loader):
         torch.save(conv2_model.state_dict(), "./saved_models/mnist-conv2_model-" + args.run_id + ".pt")
 
 def cifar_wrapper(device, args, train_loader, test_loader):
-    ### Short Circuit Model ###
-    sc_model = ShortCircuitNet(0.8).to(device)
+    ## Short Circuit Model ###
+    write_file = open('execution.txt', 'w')
+    sc_model = ShortCircuitNet(0.6, write_file=write_file).to(device)
     optimizer = torch.optim.Adam(sc_model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
         print('--Epoch ' + str(epoch) + '--')
 
         start = time.time()
-        train(args, sc_model, device, train_loader, optimizer, epoch)
+        train(args, sc_model, device, train_loader, optimizer, epoch, write_file=write_file)
         print('Training time: ' + str(time.time() - start))
 
         start = time.time()
