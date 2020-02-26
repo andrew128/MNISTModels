@@ -51,7 +51,7 @@ def train(args, model, device, train_loader, optimizer, epoch, write_file = None
         total_training_loss, correct, len(train_loader.dataset), 
         100. * correct / len(train_loader.dataset)))
 
-def test(args, model, device, test_loader):
+def test(args, model, device, test_loader, write_file = None):
     model.eval()
     test_loss = 0
     correct = 0
@@ -61,6 +61,8 @@ def test(args, model, device, test_loader):
             output = model(data)
             test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+            if write_file:
+                write_file.write('1\n' if pred[0].item() == target.item() else '0\n')
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
@@ -220,7 +222,7 @@ def cifar_wrapper(device, args, train_loader, test_loader):
         print('Training time: ' + str(time.time() - start))
 
         start = time.time()
-        test(args, sc_model, device, test_loader)
+        test(args, sc_model, device, test_loader, write_file=write_file)
         print('Testing time: ' + str(time.time() - start))
     
     if args.save_model:
