@@ -9,7 +9,13 @@ def main():
 
     # Train and save models on CIFAR data
     input_shape = (32, 32, 3)
-    num_runs = 10
+
+    # print(models.get_untrained_l1_all_digit_model().summary())
+    print(models.get_trained_l1_all_digit_model(train_images, train_labels).summary())
+    # models.get_untrained_l4_all_digit_model(input_shape).summary()
+    # print(models.get_untrained_l4_all_digit_model(input_shape).summary())
+
+    num_runs = 1
 
     # Recording training times
     l1_mean_train_time = 0
@@ -22,26 +28,25 @@ def main():
         print(i, '/', num_runs)
         t0 = time.time()
         l1_model = models.get_trained_l1_all_digit_model(train_images, train_labels, epochs=10)
+        l1_model.save('models/l1_cifar10_model' + str(i))
 
         t1 = time.time()
         l2_model = models.get_trained_l2_all_digit_model(train_images, train_labels, input_shape, epochs=10)
+        l2_model.save('models/l2_cifar10_model' + str(i))
 
         t2 = time.time()
         l3_model = models.get_trained_l3_all_digit_model(train_images, train_labels, input_shape, epochs=10)
+        l3_model.save('models/l3_cifar10_model' + str(i))
 
         t3 = time.time()
         l4_model = models.get_trained_l4_all_digit_model(train_images, train_labels, input_shape, epochs=10)
+        l4_model.save('models/l4_cifar10_model' + str(i))
         t4 = time.time()
 
         l1_mean_train_time += t1 - t0
         l2_mean_train_time += t2 - t1
         l3_mean_train_time += t3 - t2
         l4_mean_train_time += t4 - t3
-
-        l1_model.save('models/l1_cifar10_model' + str(i))
-        l2_model.save('models/l2_cifar10_model' + str(i))
-        l3_model.save('models/l3_cifar10_model' + str(i))
-        l4_model.save('models/l4_cifar10_model' + str(i))
 
     l1_mean_train_time /= num_runs
     l2_mean_train_time /= num_runs
@@ -93,7 +98,7 @@ def main():
     l3_mean_accuracy /= num_runs
     l4_mean_accuracy /= num_runs
 
-    print('Training Times')
+    # print('Training Times')
     print(l1_mean_train_time)
     print(l2_mean_train_time)
     print(l3_mean_train_time)
@@ -105,7 +110,7 @@ def main():
     print(l3_mean_test_time)
     print(l4_mean_test_time)
 
-    print('Accuracies')
+    print('Testing Accuracies')
     print(l1_mean_accuracy)
     print(l2_mean_accuracy)
     print(l3_mean_accuracy)

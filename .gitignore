@@ -5,4 +5,5 @@ researchEnv
 *.npy
 *.pyc
 ./v3/models
+./v3/models_old
 pytorch-exp/data/
