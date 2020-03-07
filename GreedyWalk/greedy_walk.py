@@ -28,6 +28,7 @@ def greedy_walk(set_of_models, search_time_constraint, model_time_constraint, \
     timeout_start = time.time()
 
     current_node = set_of_models.get_most_simple_pairing()
+    visited_nodes = set([current_node])
 
     best_node_so_far = current_node
     best_accuracy_so_far = 0
@@ -35,7 +36,7 @@ def greedy_walk(set_of_models, search_time_constraint, model_time_constraint, \
     while time.time() < timeout_start + search_time_constraint:
         prob = np.random.random()
         if prob < epsilon:
-            current_node = set_of_models.get_random_neighbor_pairing()
+            current_node = set_of_models.get_random_neighbor_pairing(visited_nodes)
         else:
             current_optimal_conf_value = get_optimal_confidence_value_random(current_node, \
                                                     conf_value_dataset, model_time_constraint)
@@ -49,9 +50,11 @@ def greedy_walk(set_of_models, search_time_constraint, model_time_constraint, \
             if test_time < model_time_constraint:
                 if test_accuracy > best_accuracy_so_far:
                     best_node_so_far = current_node
-                current_node = set_of_models.get_neighbor_greater_complexity()
+                current_node = set_of_models.get_neighbor_greater_complexity(visited_nodes)
             else:
-                current_node = set_of_models.get_neighbor_smaller_complexity()
+                current_node = set_of_models.get_neighbor_smaller_complexity(visited_nodes)
+
+        visited_nodes.add(current_node)
 
     return best_node_so_far
 
