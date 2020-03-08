@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 from __future__ import print_function
 import argparse
+import collections
 import time
 import torch
 import torch.nn as nn
@@ -208,25 +209,73 @@ def mnist_wrapper(device, args, train_loader, test_loader):
         torch.save(conv2_model.state_dict(), "./saved_models/mnist-conv2_model-" + args.run_id + ".pt")
 
 def cifar_wrapper(device, args, train_loader, test_loader):
-    ## Short Circuit Model ###
+    # Short Circuit Model ###
+
     write_file = open('execution.txt', 'w')
-    sc_model = ShortCircuitNet(0.15, write_file=write_file).to(device)
+    sc_model = ShortCircuitNet(1, write_file=write_file).to(device)
     optimizer = torch.optim.Adam(sc_model.parameters(), lr=args.lr)
+    
+    saved_weights_conv1 = torch.load('./saved_models/cifar-conv1_model-frozen-sc-1.pt')
+    saved_weights_conv2 = torch.load('./saved_models/cifar-conv2_model-frozen-sc-1.pt')
+    saved_weights_conv3 = torch.load('./saved_models/cifar-conv3_model-frozen-sc-1.pt')
+
+    # for k in saved_weights_conv1:
+    #     print(k)
+    # print('---')
+    # for k in saved_weights_conv2:
+    #     print(k)
+    # print('---')
+    # for k in saved_weights_conv3:
+    #     print(k)
+    # print('-')
+    # for k in sc_model.state_dict():
+    #     print(k)
+    
+    custom_dict = collections.OrderedDict()
+    custom_dict['conv1.weight'] = saved_weights_conv3['prev_layer0.conv.weight']
+    custom_dict['conv1.bias'] = saved_weights_conv3['prev_layer0.conv.bias']
+    custom_dict['conv2.weight'] = saved_weights_conv3['prev_layer1.conv.weight']
+    custom_dict['conv2.bias'] = saved_weights_conv3['prev_layer1.conv.bias']
+    custom_dict['conv3.weight'] = saved_weights_conv3['last_conv.conv.weight']
+    custom_dict['conv3.bias'] = saved_weights_conv3['last_conv.conv.bias']
+
+    custom_dict['fc1.fc0.weight'] = saved_weights_conv1['simple_output.fc0.weight']
+    custom_dict['fc1.fc0.bias'] = saved_weights_conv1['simple_output.fc0.bias']
+    custom_dict['fc1.fc1.weight'] = saved_weights_conv1['simple_output.fc1.weight']
+    custom_dict['fc1.fc1.bias'] = saved_weights_conv1['simple_output.fc1.bias']
+    custom_dict['fc1.fc2.weight'] = saved_weights_conv1['simple_output.fc2.weight']
+    custom_dict['fc1.fc2.bias'] = saved_weights_conv1['simple_output.fc2.bias']
+
+    custom_dict['fc2.fc0.weight'] = saved_weights_conv2['simple_output.fc0.weight']
+    custom_dict['fc2.fc0.bias'] = saved_weights_conv2['simple_output.fc0.bias']
+    custom_dict['fc2.fc1.weight'] = saved_weights_conv2['simple_output.fc1.weight']
+    custom_dict['fc2.fc1.bias'] = saved_weights_conv2['simple_output.fc1.bias']
+    custom_dict['fc2.fc2.weight'] = saved_weights_conv2['simple_output.fc2.weight']
+    custom_dict['fc2.fc2.bias'] = saved_weights_conv2['simple_output.fc2.bias']
+
+    custom_dict['fc3.fc0.weight'] = saved_weights_conv3['simple_output.fc0.weight']
+    custom_dict['fc3.fc0.bias'] = saved_weights_conv3['simple_output.fc0.bias']
+    custom_dict['fc3.fc1.weight'] = saved_weights_conv3['simple_output.fc1.weight']
+    custom_dict['fc3.fc1.bias'] = saved_weights_conv3['simple_output.fc1.bias']
+    custom_dict['fc3.fc2.weight'] = saved_weights_conv3['simple_output.fc2.weight']
+    custom_dict['fc3.fc2.bias'] = saved_weights_conv3['simple_output.fc2.bias']
+
+    sc_model.load_state_dict(custom_dict)
 
     for epoch in range(1, args.epochs + 1):
         write_file.write('---\n')
         print('--Epoch ' + str(epoch) + '--')
 
-        start = time.time()
-        train(args, sc_model, device, train_loader, optimizer, epoch, write_file=write_file)
-        print('Training time: ' + str(time.time() - start))
+        # start = time.time()
+        # train(args, sc_model, device, train_loader, optimizer, epoch, write_file=write_file)
+        # print('Training time: ' + str(time.time() - start))
 
         start = time.time()
         test(args, sc_model, device, test_loader, write_file=write_file)
         print('Testing time: ' + str(time.time() - start))
     
-    if args.save_model:
-        torch.save(sc_model.state_dict(), "./saved_models/sc-" + args.run_id + ".pt")
+    # if args.save_model:
+    #     torch.save(sc_model.state_dict(), "./saved_models/sc-" + args.run_id + ".pt")
 
     # print('------Full Model------')
     # full_model = BaseNet(3, 32, 64, 12544, 256).to(device)
@@ -246,7 +295,7 @@ def cifar_wrapper(device, args, train_loader, test_loader):
     # if args.save_model:
     #     torch.save(full_model.state_dict(), "./saved_models/cifar-full_model-" + args.run_id + ".pt")
 
-    ########### Conv1 Model setup ###########
+    # ########## Conv1 Model setup ###########
     # print('------Conv 1 Model------')
     # conv1_model = Conv1Net(3, 32, [7200, 1024, 256, 10]).to(device)
     # optimizer = torch.optim.Adam(conv1_model.parameters(), lr=args.lr)
@@ -295,13 +344,13 @@ def cifar_wrapper(device, args, train_loader, test_loader):
     # if args.save_model:
     #     torch.save(conv2_model.state_dict(), "./saved_models/cifar-conv2_model-" + args.run_id + ".pt")
 
-    ########### Conv3 Model setup ###########
-    # save the conv1 weights / bias
+    # ########## Conv3 Model setup ###########
+    # # save the conv1 weights / bias
     # torch.save({'conv.weight': conv2_model.state_dict()['prev_layer0.conv.weight'], 
     #             'conv.bias': conv2_model.state_dict()['prev_layer0.conv.bias']}, './tmp/cifar-conv1_weights.pt')
     # conv1_saved_weights = torch.load('./tmp/cifar-conv1_weights.pt')
 
-    # save the conv2 weights / bias
+    # # save the conv2 weights / bias
     # torch.save({'conv.weight': conv2_model.state_dict()['last_conv.conv.weight'], 
     #             'conv.bias': conv2_model.state_dict()['last_conv.conv.bias']}, './tmp/cifar-conv2_weights.pt')
     # conv2_saved_weights = torch.load('./tmp/cifar-conv2_weights.pt')
