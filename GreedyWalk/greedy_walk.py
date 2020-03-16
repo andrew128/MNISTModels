@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-import GreedyWalk.set_of_nodes as SetOfNodes
+import GreedyWalk.graph as Graph
 
 def get_optimal_confidence_value_grid(node, dataset, model_time_constraint, step_size = 0.1):
     '''
@@ -27,10 +27,10 @@ def get_optimal_confidence_value_grid(node, dataset, model_time_constraint, step
 def get_optimal_confidence_value_random():
     pass
 
-def greedy_walk(set_of_nodes, search_time_constraint, model_time_constraint, \
+def greedy_walk(graph, search_time_constraint, model_time_constraint, \
                 validation_dataset, conf_value_dataset, epsilon = 0.1):
     '''
-    param: set_of_nodes - SetOfNodes object representing all possible model pairings
+    param: graph - Graph object representing all possible model pairings
     param: search_time_constraint - amount of time given to search
     param: model_time_constraint - amount of time output model pairing must 
                                     complete validation_dataset within
@@ -45,7 +45,7 @@ def greedy_walk(set_of_nodes, search_time_constraint, model_time_constraint, \
     '''
     timeout_start = time.time()
 
-    current_node = set_of_nodes.get_most_simple_pairing()
+    current_node = graph.get_most_simple_pairing()
     visited_nodes = set([current_node])
 
     best_node_so_far = current_node
@@ -54,23 +54,23 @@ def greedy_walk(set_of_nodes, search_time_constraint, model_time_constraint, \
     while time.time() < timeout_start + search_time_constraint:
         prob = np.random.random()
         if prob < epsilon:
-            current_node = set_of_nodes.get_random_neighbor_pairing(visited_nodes)
+            current_node = graph.get_random_neighbor_pairing(visited_nodes)
         else:
             current_optimal_conf_value = get_optimal_confidence_value_random(current_node, \
                                                     conf_value_dataset, model_time_constraint)
             current_node.optimal_confidence_value = current_optimal_conf_value
 
             # Test model pairing with current_optimal_conf_value
-            test_accuracy, test_time = set_of_nodes.test_node(current_node, current_optimal_conf_value)
+            test_accuracy, test_time = graph.test_node(current_node, current_optimal_conf_value)
             current_node.accuracy = test_accuracy
             current_node.time = test_time
 
             if test_time < model_time_constraint:
                 if test_accuracy > best_accuracy_so_far:
                     best_node_so_far = current_node
-                current_node = set_of_nodes.get_neighbor_greater_complexity(visited_nodes)
+                current_node = graph.get_neighbor_greater_complexity(visited_nodes)
             else:
-                current_node = set_of_nodes.get_neighbor_smaller_complexity(visited_nodes)
+                current_node = graph.get_neighbor_smaller_complexity(visited_nodes)
 
         visited_nodes.add(current_node)
 
