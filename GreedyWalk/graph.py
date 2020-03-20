@@ -50,7 +50,8 @@ class Graph():
         Takes in a set of trained models and testing data.
         '''
         # Dictionary of complexity (int) -> Model (object)
-        self.model_dict = self.__add_models(models)
+        self.model_dict = {}
+        self.__add_models(models)
         
         self.num_models = len(models)
         self.full_size = self.num_models * (self.num_models - 1)
@@ -66,12 +67,12 @@ class Graph():
     def __add_models(self, models):
         for model in models:
             assert model.complexity_index != None
-            self.model_dict[model.complexity_index]
+            self.model_dict[model.complexity_index] = model
 
     def mark_node_visited(self, node):
         complexities = node.complexities
-        graph.visited[(complexities[0], complexities[1])] = node
-        graph.visited[(complexities[1], complexities[0])] = node
+        self.visited[(complexities[0], complexities[1])] = node
+        self.visited[(complexities[1], complexities[0])] = node
 
     def get_most_simple_node(self):
         if self.num_models < 2:
@@ -161,7 +162,7 @@ class Graph():
         while True:
             if len(self.visited) == self.full_size:
                 return None
-                
+
             change_first_index = random.randrange(0, 2)
             new_complexity_index_0 = complexity_index_0
             new_complexity_index_1 = complexity_index_1
