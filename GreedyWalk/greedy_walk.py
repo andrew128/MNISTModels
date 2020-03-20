@@ -45,34 +45,34 @@ def greedy_walk(graph, search_time_constraint, model_time_constraint, \
     '''
     timeout_start = time.time()
 
-    current_node = graph.get_most_simple_pairing()
-    visited_nodes = set([current_node])
+    current_node = graph.get_most_simple_node()
 
     best_node_so_far = current_node
     best_accuracy_so_far = 0
 
     while time.time() < timeout_start + search_time_constraint:
+        graph.visited[current_node.complexities] = current_node
+
         prob = np.random.random()
         if prob < epsilon:
-            current_node = graph.get_random_neighbor_pairing(visited_nodes)
+            current_node = graph.get_random_neighbor_pairing(current_node)
         else:
             current_optimal_conf_value = get_optimal_confidence_value_random(current_node, \
                                                     conf_value_dataset, model_time_constraint)
             current_node.optimal_confidence_value = current_optimal_conf_value
 
             # Test model pairing with current_optimal_conf_value
-            test_accuracy, test_time = graph.test_node(current_node, current_optimal_conf_value)
-            current_node.accuracy = test_accuracy
-            current_node.time = test_time
+            current_node.set_optimal_time_and_accuracy(validation_dataset)
 
-            if test_time < model_time_constraint:
-                if test_accuracy > best_accuracy_so_far:
+            if current_node.optimal_test_time < model_time_constraint:
+                if current_node.optimal_test_accuracy > best_accuracy_so_far:
                     best_node_so_far = current_node
-                current_node = graph.get_neighbor_greater_complexity(visited_nodes)
+                current_node = graph.get_neighbor_greater_complexity(current_node)
             else:
-                current_node = graph.get_neighbor_smaller_complexity(visited_nodes)
+                current_node = graph.get_neighbor_smaller_complexity(current_node)
 
-        visited_nodes.add(current_node)
+        if current_node == None: # Traversed entire graph space
+            break
 
     return best_node_so_far
 
@@ -82,9 +82,11 @@ def naive_search():
 def main():
     # Get MNIST data and split train-test 0.7-0.3
 
-    # Train each of the models
+    # Train each of the models and store as Graph.Model object (with corresponding complexity)
 
-    # Create set of models object
+    # Remove any models with higher time and worse accuracy than any other model
+
+    # Create graph object and add models sorted based on complexity
 
     # Call GreedyWalk
     pass
