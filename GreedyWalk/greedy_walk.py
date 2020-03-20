@@ -51,7 +51,7 @@ def greedy_walk(graph, search_time_constraint, model_time_constraint, \
     best_accuracy_so_far = 0
 
     while time.time() < timeout_start + search_time_constraint:
-        graph.visited[current_node.complexities] = current_node
+        graph.mark_node_visited(current_node)
 
         prob = np.random.random()
         if prob < epsilon:
