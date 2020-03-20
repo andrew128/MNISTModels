@@ -58,10 +58,20 @@ class Graph():
         # Dictionary of visited mapping [simple complexity index, complex complexity index] -> Node
         self.visited = {}
 
+        # Add Nodes with same indices to visited so never consider them.
+        for i in range(self.num_models):
+            self.visited[(i, i)] = None
+
+
     def __add_models(self, models):
         for model in models:
             assert model.complexity_index != None
             self.model_dict[model.complexity_index]
+
+    def mark_node_visited(self, node):
+        complexities = node.complexities
+        graph.visited[(complexities[0], complexities[1])] = node
+        graph.visited[(complexities[1], complexities[0])] = node
 
     def get_most_simple_node(self):
         if self.num_models < 2:
@@ -79,6 +89,9 @@ class Graph():
         complexity_index_1 = node.complexities[1]
 
         while True:
+            if len(self.visited) == self.full_size:
+                return None
+
             change_first_index = random.randrange(0, 2)
             new_complexity_index_0 = complexity_index_0
             new_complexity_index_1 = complexity_index_1
@@ -111,6 +124,9 @@ class Graph():
         complexity_index_1 = node.complexities[1]
 
         while True:
+            if len(self.visited) == self.full_size:
+                return None
+
             change_first_index = random.randrange(0, 2)
             new_complexity_index_0 = complexity_index_0
             new_complexity_index_1 = complexity_index_1
@@ -143,6 +159,9 @@ class Graph():
         complexity_index_1 = node.complexities[1]
 
         while True:
+            if len(self.visited) == self.full_size:
+                return None
+                
             change_first_index = random.randrange(0, 2)
             new_complexity_index_0 = complexity_index_0
             new_complexity_index_1 = complexity_index_1
