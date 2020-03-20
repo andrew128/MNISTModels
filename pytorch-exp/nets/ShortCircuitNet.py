@@ -20,9 +20,9 @@ class ShortCircuitNet(nn.Module):
         self.conv2 = nn.Conv2d(32, 64, kernel_size)
         self.conv3 = nn.Conv2d(64, 128, kernel_size)
 
-        self.fc1 = Output([7200, 256, 10])
-        self.fc2 = Output([12544, 256, 10])
-        self.fc3 = Output([21632, 256, 10])
+        self.fc1 = Output([7200, 1024, 256, 10])
+        self.fc2 = Output([12544, 1024, 256, 10])
+        self.fc3 = Output([21632, 1024, 256, 10])
 
         self.flatten = Flatten()
         self.dropout1 = nn.Dropout2d(dropout)
