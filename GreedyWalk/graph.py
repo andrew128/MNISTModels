@@ -50,6 +50,8 @@ class Graph():
         Takes in a set of trained models and testing data.
         '''
         # Dictionary of complexity (int) -> Model (object)
+        assert len(models) >= 2
+
         self.model_dict = {}
         self.__add_models(models)
         
@@ -77,7 +79,7 @@ class Graph():
     def get_most_simple_node(self):
         if self.num_models < 2:
             raise Exception("Error getting most simple pairing - Graph contains less than 2 models")
-        return Node(model_dict[0], model_dict[1])
+        return Node(self.model_dict[0], self.model_dict[1])
 
     def get_random_neighbor_pairing(self, node):
         '''
@@ -105,12 +107,12 @@ class Graph():
                 new_complexity_index_1 = random.randrange(0, self.num_models)
 
             # If visited or randomly generated indices are the same, continue
-            if self.visited[(new_complexity_index_0, new_complexity_index_1)] == None \
-                or self.visited[(new_complexity_index_1, new_complexity_index_0)] == None \
+            if (new_complexity_index_0, new_complexity_index_1) in self.visited \
+                or (new_complexity_index_1, new_complexity_index_0) in self.visited \
                     or new_complexity_index_0 == new_complexity_index_1:
                 continue
             else:
-                return Node(model_dict[new_complexity_index_0], model_dict[new_complexity_index_1])
+                return Node(self.model_dict[new_complexity_index_0], self.model_dict[new_complexity_index_1])
 
     def get_neighbor_greater_complexity(self, node):
         '''
@@ -145,7 +147,7 @@ class Graph():
                     or new_complexity_index_0 == new_complexity_index_1:
                 continue
             else:
-                return Node(model_dict[new_complexity_index_0], model_dict[new_complexity_index_1])
+                return Node(self.model_dict[new_complexity_index_0], self.model_dict[new_complexity_index_1])
 
     def get_neighbor_smaller_complexity(self, node):
         '''
@@ -180,7 +182,7 @@ class Graph():
                     or new_complexity_index_0 == new_complexity_index_1:
                 continue
             else:
-                return Node(model_dict[new_complexity_index_0], model_dict[new_complexity_index_1])
+                return Node(self.model_dict[new_complexity_index_0], self.model_dict[new_complexity_index_1])
 
 def main():
     pass
