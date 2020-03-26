@@ -56,7 +56,10 @@ class Graph():
         self.__add_models(models)
         
         self.num_models = len(models)
-        self.full_size = self.num_models * (self.num_models - 1)
+        # Counts nodes with same simple and complex complexities because
+        # will exist in visited set (basically everything in 
+        # num_models x num_models matrix).
+        self.full_size = self.num_models * self.num_models
 
         # Dictionary of visited mapping [simple complexity index, complex complexity index] -> Node
         self.visited = {}
@@ -122,6 +125,8 @@ class Graph():
 
         Continually selects random models until ends up with pair with non equal complexity
         indices and not seen before in visited.
+
+        NOTE: Method doesn't automatically add returned node to visited set.
         '''
         complexity_index_0 = node.complexities[0]
         complexity_index_1 = node.complexities[1]
@@ -134,16 +139,22 @@ class Graph():
             new_complexity_index_0 = complexity_index_0
             new_complexity_index_1 = complexity_index_1
 
-            if change_first_index:
+            # Handle case where input node is most complex viable node.
+            if complexity_index_0 + 1 >= self.num_models or \
+                    complexity_index_1 + 1 >= self.num_models:
+                return None
+
+            # If selected to change first index and can change
+            if change_first_index and complexity_index_0 + 1 < self.num_models:
                 # Randomly change first index to be less than original
                 new_complexity_index_0 = random.randrange(complexity_index_0 + 1, self.num_models)
-            else:
+            elif not change_first_index and complexity_index_1 + 1 < self.num_models:
                 # Randomly change second index to be less than original
                 new_complexity_index_1 = random.randrange(complexity_index_1 + 1, self.num_models)
 
             # If visited or randomly generated indices are the same, continue
-            if self.visited[(new_complexity_index_0, new_complexity_index_1)] == None \
-                or self.visited[(new_complexity_index_1, new_complexity_index_0)] == None \
+            if (new_complexity_index_0, new_complexity_index_1) in self.visited \
+                or (new_complexity_index_1, new_complexity_index_0) in self.visited \
                     or new_complexity_index_0 == new_complexity_index_1:
                 continue
             else:

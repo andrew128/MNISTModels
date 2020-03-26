@@ -114,7 +114,7 @@ class TestGetRandomNeighborPairing(unittest.TestCase):
 
         Run 100 times to reduce probability of randomly passing every time.
         '''
-        for _ in range(100):
+        for _ in range(10):
             num_models = 3
             models = []
             for i in range(num_models):
@@ -125,6 +125,7 @@ class TestGetRandomNeighborPairing(unittest.TestCase):
 
             node = Node(models[1], models[2])
             graph.mark_node_visited(node)
+
             random_neighbor_node = graph.get_random_neighbor_pairing(node)
 
             valid_set = set([(0, 1), (1, 0), (0, 2), (2, 0)])
@@ -157,10 +158,80 @@ class TestGetRandomNeighborPairing(unittest.TestCase):
 
             self.assertTrue(random_neighbor_node.complexities in valid_set)
 
+    def test_get_random_neighbor_none(self):
+        '''
+        Possible random neighors for 3,2:
+        0,2   3,0
+        1,2   3,1
+        4,2   3,4
 
-# class TestGetNeighborGreaterComplexity(unittest.TestCase):
-#     def test_mark_node_visited_basic(self):
-#         self.assertEqual('foo'.upper(), 'FOO')
+        Run 1000 times to reduce probability of randomly passing every time.
+        '''
+        for _ in range(1000):
+            num_models = 2
+            models = []
+            for i in range(num_models):
+                models.append(Model(None))
+                models[i].complexity_index = i
+
+            graph = Graph(models)
+
+            node = Node(models[1], models[0])
+            graph.mark_node_visited(node)
+            random_neighbor_node = graph.get_random_neighbor_pairing(node)
+
+            self.assertTrue(random_neighbor_node == None)
+
+class TestGetNeighborGreaterComplexity(unittest.TestCase):
+    def test_get_neighbor_greater_complexity_basic0(self):
+        '''
+        Possible random neighors for 0,1:
+        0, 2 and 2, 1
+
+        Run 100 times to reduce probability of randomly passing every time.
+        '''
+        for _ in range(100):
+            num_models = 3
+            models = []
+            for i in range(num_models):
+                models.append(Model(None))
+                models[i].complexity_index = i
+
+            graph = Graph(models)
+
+            node = Node(models[0], models[1])
+            graph.mark_node_visited(node)
+            random_neighbor_node = graph.get_neighbor_greater_complexity(node)
+
+            valid_set = set([(0, 2), (2, 1)])
+
+            self.assertTrue(random_neighbor_node.complexities in valid_set)
+
+    def test_get_neighbor_greater_complexity_none(self):
+        '''
+        Possible random neighors for 1,2:
+        0, 1
+        1, 0
+        0, 2
+        2, 0
+
+        Run 1000 times to reduce probability of randomly passing test every time.
+        '''
+        for _ in range(1000):
+            num_models = 3
+            models = []
+            for i in range(num_models):
+                models.append(Model(None))
+                models[i].complexity_index = i
+
+            graph = Graph(models)
+
+            node = Node(models[1], models[2])
+            graph.mark_node_visited(node)
+            random_neighbor_node = graph.get_neighbor_greater_complexity(node)
+
+            self.assertIsNone(random_neighbor_node)
+
 
 # class TestGetNeighborSimplerComplexity(unittest.TestCase):
 #     def test_mark_node_visited_basic(self):
