@@ -355,6 +355,71 @@ class TestGetNeighborGreaterComplexity(unittest.TestCase):
 
             self.assertIsNone(neighbor_node_greater_complexity)
 
+class TestHasUnvisitedSmallerComplexityNeighbors(unittest.TestCase):
+    def test_has_unvisited_smaller_complexity_neighbors0(self):
+        num_models = 5
+        models = []
+        for i in range(num_models):
+            models.append(Model(None))
+            models[i].complexity_index = i
+
+        graph = Graph(models)
+
+        node = Node(models[2], models[4])
+        graph.mark_node_visited(node)
+        self.assertTrue(graph.has_unvisited_smaller_complexity_neighbors(node))
+
+    def test_has_unvisited_smaller_complexity_neighbors1(self):
+        num_models = 3
+        models = []
+        for i in range(num_models):
+            models.append(Model(None))
+            models[i].complexity_index = i
+
+        graph = Graph(models)
+
+        node = Node(models[2], models[1])
+        graph.mark_node_visited(node)
+        self.assertTrue(graph.has_unvisited_smaller_complexity_neighbors(node))
+
+    def test_has_unvisited_smaller_complexity_neighbors2(self):
+        num_models = 3
+        models = []
+        for i in range(num_models):
+            models.append(Model(None))
+            models[i].complexity_index = i
+
+        graph = Graph(models)
+
+        node = Node(models[0], models[2])
+        graph.mark_node_visited(node)
+        self.assertTrue(graph.has_unvisited_smaller_complexity_neighbors(node))
+
+    def test_has_unvisited_smaller_complexity_neighbors_none(self):
+        num_models = 3
+        models = []
+        for i in range(num_models):
+            models.append(Model(None))
+            models[i].complexity_index = i
+
+        graph = Graph(models)
+
+        node = Node(models[1], models[0])
+        graph.mark_node_visited(node)
+        self.assertFalse(graph.has_unvisited_smaller_complexity_neighbors(node))
+
+    def test_has_unvisited_smaller_complexity_neighbors_none0(self):
+        num_models = 3
+        models = []
+        for i in range(num_models):
+            models.append(Model(None))
+            models[i].complexity_index = i
+
+        graph = Graph(models)
+
+        node = Node(models[0], models[1])
+        graph.mark_node_visited(node)
+        self.assertFalse(graph.has_unvisited_smaller_complexity_neighbors(node))
 
 # class TestGetNeighborSimplerComplexity(unittest.TestCase):
 #     def test_get_neighbor_simpler_complexity_basic0(self):

@@ -38,6 +38,13 @@
     - test_get_neighbor_greater_complexity_none_most_complex
     - test_get_neighbor_greater_complexity_none_most_complex_0
 
+- TestHasUnvisitedSmallerComplexityNeighbors
+    - test_has_unvisited_greater_complexity_neighbors0
+    - test_has_unvisited_greater_complexity_neighbors1
+    - test_has_unvisited_greater_complexity_neighbors2
+    - test_has_unvisited_greater_complexity_neighbors_none
+    - test_has_unvisited_greater_complexity_neighbors_none0
+
 - TestGetNeighborSimplerComplexity
     - test_get_neighbor_simpler_complexity_basic0
     - test_get_neighbor_simpler_complexity_none

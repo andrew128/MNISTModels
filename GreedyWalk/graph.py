@@ -174,6 +174,18 @@ class Graph():
             else:
                 return Node(self.model_dict[new_complexity_index_0], self.model_dict[new_complexity_index_1])
 
+    def has_unvisited_smaller_complexity_neighbors(self, node):
+        '''
+        Returns true if there are nodes more complex than the input nodes
+        that are unvisited.
+        '''
+        for i in range(0, node.complexities[0] + 1):
+            for j in range(0, node.complexities[1] + 1):
+                if (i, j) not in self.visited or (j, i) not in self.visited:
+                    return True
+
+        return False
+
     def get_neighbor_smaller_complexity(self, node):
         '''
         Returns Node containing random pairing of models with constraint that one of the 
