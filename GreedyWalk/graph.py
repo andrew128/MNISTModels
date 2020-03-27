@@ -146,13 +146,13 @@ class Graph():
         '''
         # Check to see if actually possible to return a neighbor of greater complexity
         if len(self.visited) == self.full_size or \
-                not self.__has_unvisited_greater_complexity_neighbors(node):
+                not self.has_unvisited_greater_complexity_neighbors(node):
             return None
 
         complexity_index_0 = node.complexities[0]
         complexity_index_1 = node.complexities[1]
 
-        # Randomly change 
+        # Randomly choose index of Node's models going to change 
         while True:
             change_first_index = random.randrange(0, 2)
             new_complexity_index_0 = complexity_index_0
