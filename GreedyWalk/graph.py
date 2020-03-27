@@ -11,18 +11,21 @@ class Node():
     '''
     Model pairing
     '''
-    def __init__(self, simple_model, complex_model):
+    def __init__(self, model_1, model_2):
         # Model objects
-        self.simple_model = simple_model
-        self.complex_model = complex_model
+        self.model_1 = model_1
+        self.model_2 = model_2
 
-        self.complexities = (simple_model.complexity_index, complex_model.complexity_index)
+        self.complexities = (model_1.complexity_index, model_2.complexity_index)
 
         self.optimal_confidence_value = None
 
         # Test accuracy/time using optimal confidence value
         self.optimal_test_accuracy = None
         self.optimal_test_time = None
+
+    def accuracy(self, dataset, conf_value):
+        pass
 
     def set_optimal_time_and_accuracy(self, data):
         '''
@@ -32,6 +35,7 @@ class Node():
         :return: void
         '''
         assert self.optimal_confidence_value != None
+
         pass
 
 class Graph():
@@ -117,6 +121,18 @@ class Graph():
             else:
                 return Node(self.model_dict[new_complexity_index_0], self.model_dict[new_complexity_index_1])
 
+    def has_unvisited_greater_complexity_neighbors(self, node):
+        '''
+        Returns true if there are nodes more complex than the input nodes
+        that are unvisited.
+        '''
+        for i in range(node.complexities[0], self.num_models):
+            for j in range(node.complexities[1], self.num_models):
+                if (i, j) not in self.visited or (j, i) not in self.visited:
+                    return True
+
+        return False
+
     def get_neighbor_greater_complexity(self, node):
         '''
         Returns Node containing random pairing of models with constraint that one of the 
@@ -128,28 +144,26 @@ class Graph():
 
         NOTE: Method doesn't automatically add returned node to visited set.
         '''
+        # Check to see if actually possible to return a neighbor of greater complexity
+        if len(self.visited) == self.full_size or \
+                not self.__has_unvisited_greater_complexity_neighbors(node):
+            return None
+
         complexity_index_0 = node.complexities[0]
         complexity_index_1 = node.complexities[1]
 
+        # Randomly change 
         while True:
-            if len(self.visited) == self.full_size:
-                return None
-
             change_first_index = random.randrange(0, 2)
             new_complexity_index_0 = complexity_index_0
             new_complexity_index_1 = complexity_index_1
 
-            # Handle case where input node is most complex viable node.
-            if complexity_index_0 + 1 >= self.num_models or \
-                    complexity_index_1 + 1 >= self.num_models:
-                return None
-
             # If selected to change first index and can change
             if change_first_index and complexity_index_0 + 1 < self.num_models:
-                # Randomly change first index to be less than original
+                # Randomly change first index to be greater than original
                 new_complexity_index_0 = random.randrange(complexity_index_0 + 1, self.num_models)
             elif not change_first_index and complexity_index_1 + 1 < self.num_models:
-                # Randomly change second index to be less than original
+                # Randomly change second index to be greater than original
                 new_complexity_index_1 = random.randrange(complexity_index_1 + 1, self.num_models)
 
             # If visited or randomly generated indices are the same, continue
@@ -179,6 +193,11 @@ class Graph():
             change_first_index = random.randrange(0, 2)
             new_complexity_index_0 = complexity_index_0
             new_complexity_index_1 = complexity_index_1
+
+            # Handle case where input node is most complex viable node.
+            # if complexity_index_0 == 0 or \
+            #         complexity_index_1 + 1 >= self.num_models:
+            #     return None
 
             if change_first_index:
                 # Randomly change first index to be less than original
