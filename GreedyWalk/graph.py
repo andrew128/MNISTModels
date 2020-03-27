@@ -174,7 +174,7 @@ class Graph():
             else:
                 return Node(self.model_dict[new_complexity_index_0], self.model_dict[new_complexity_index_1])
 
-    def has_unvisited_smaller_complexity_neighbors(self, node):
+    def has_unvisited_simpler_complexity_neighbors(self, node):
         '''
         Returns true if there are nodes more complex than the input nodes
         that are unvisited.
@@ -186,7 +186,7 @@ class Graph():
 
         return False
 
-    def get_neighbor_smaller_complexity(self, node):
+    def get_neighbor_simpler_complexity(self, node):
         '''
         Returns Node containing random pairing of models with constraint that one of the 
         models in the Node returned is the same as one of the models in the input Node AND 
@@ -195,32 +195,31 @@ class Graph():
         Continually selects random models until ends up with pair with non equal complexity
         indices and not seen before in visited.
         '''
+        # Check to see if actually possible to return a neighbor of smaller complexity
+        if len(self.visited) == self.full_size or \
+                not self.has_unvisited_simpler_complexity_neighbors(node):
+            return None
+
         complexity_index_0 = node.complexities[0]
         complexity_index_1 = node.complexities[1]
 
+        # Randomly choose index of Node's models going to change 
         while True:
-            if len(self.visited) == self.full_size:
-                return None
-
             change_first_index = random.randrange(0, 2)
             new_complexity_index_0 = complexity_index_0
             new_complexity_index_1 = complexity_index_1
 
-            # Handle case where input node is most complex viable node.
-            # if complexity_index_0 == 0 or \
-            #         complexity_index_1 + 1 >= self.num_models:
-            #     return None
-
-            if change_first_index:
-                # Randomly change first index to be less than original
+            # If selected to change first index and can change
+            if change_first_index and complexity_index_0 >= 0:
+                # Randomly change first index to be greater than original
                 new_complexity_index_0 = random.randrange(0, complexity_index_0)
-            else:
-                # Randomly change second index to be less than original
+            elif not change_first_index and complexity_index_1 >= 0:
+                # Randomly change second index to be greater than original
                 new_complexity_index_1 = random.randrange(0, complexity_index_1)
 
             # If visited or randomly generated indices are the same, continue
-            if self.visited[(new_complexity_index_0, new_complexity_index_1)] == None \
-                or self.visited[(new_complexity_index_1, new_complexity_index_0)] == None \
+            if (new_complexity_index_0, new_complexity_index_1) in self.visited \
+                or (new_complexity_index_1, new_complexity_index_0) in self.visited \
                     or new_complexity_index_0 == new_complexity_index_1:
                 continue
             else:

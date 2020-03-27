@@ -1,11 +1,23 @@
+# GreedyWalk
+
+## Purpose
+GreedyWalk's purpose is to find the model pairing that achieves the highest accuracy on the MNIST dataset within a certain time limit given a set of models.
+
+## Description of Algorithm
+- Inputs:
+    - Search Time Constraint
+    - Model Time Constraint
+    - Set of Models
+    - Dataset
+- Output:
+    - pair of models
+    
 ## How to Run
 
 ## Directory Structure
 - greedy_walk.py: implementation of GreedyWalk
 - graph.py: Graph data structure that GreedyWalk uses
 - graph_test.py: Tests for graph.py
-
-## Description of Algorithm
 
 ## Test Cases
 - TestGraphInit
@@ -38,7 +50,7 @@
     - test_get_neighbor_greater_complexity_none_most_complex
     - test_get_neighbor_greater_complexity_none_most_complex_0
 
-- TestHasUnvisitedSmallerComplexityNeighbors
+- TestHasUnvisitedSimplerComplexityNeighbors
     - test_has_unvisited_greater_complexity_neighbors0
     - test_has_unvisited_greater_complexity_neighbors1
     - test_has_unvisited_greater_complexity_neighbors2
@@ -47,7 +59,9 @@
 
 - TestGetNeighborSimplerComplexity
     - test_get_neighbor_simpler_complexity_basic0
+    - test_get_neighbor_simpler_complexity_none0
     - test_get_neighbor_simpler_complexity_none
+    - test_get_neighbor_simpler_complexity_none_most_simple
 
 ## Potential Bottlenecks
 - When getting more complex or simpler neighbor, code first checks to see if there actually exists a complex or simpler neighbor.
