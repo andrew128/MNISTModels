@@ -1,4 +1,6 @@
 import random
+import time
+import numpy as np
 
 class Model():
     def __init__(self, model):
@@ -20,23 +22,52 @@ class Node():
 
         self.optimal_confidence_value = None
 
-        # Test accuracy/time using optimal confidence value
-        self.optimal_test_accuracy = None
-        self.optimal_test_time = None
+    def find_and_set_optimal_confidence_value_grid(self, dataset, model_time_constraint, \
+            step_size = 0.1):
+        '''
+        For each possible confidence value between 0 and 1 with input step_size, run the 
+        node with the current confidence value. Store the confidence_value that gives the best accuracy.
+
+        :return: boolean - true if node using optimal confidence value ran within the model's
+                           time constraint.
+        '''
+        confidence_values = np.arange(0, 1.1, 0.1)
+        best_confidence_value = 0
+        best_accuracy = 0
+
+        satisfy_model_time_constraint = False
+        for conf_value in confidence_values:
+            before = time.time()
+            current_accuracy = self.accuracy(dataset, conf_value)
+            after = time.time()
+
+            if after - before < model_time_constraint:
+                satisfy_model_time_constraint = True
+                if current_accuracy > best_accuracy:
+                    best_accuracy = current_accuracy
+                    best_confidence_value = conf_value
+
+        # Only set optimal fields if within input time constraint.
+        if satisfy_model_time_constraint:
+            self.optimal_confidence_value = best_confidence_value
+        
+        return satisfy_model_time_constraint
+
+    def find_and_set_optimal_confidence_value_random(self, dataset, model_time_constraint, step_size = 0.1):
+        pass
 
     def accuracy(self, dataset, conf_value):
+        '''
+        Get the accuracy of this combined model with the given confidence value.
+        '''
         pass
 
-    def set_optimal_time_and_accuracy(self, data):
-        '''
-        Sets self.optimal_test_accuracy and self.optimal_test_time values
-        using self.optimal_confidence_value.
+    def get_accuracy_and_time_optimal_conf(self, dataset):
+        before = time.time()
+        accuracy = self.accuracy(dataset, self.optimal_confidence_value)
+        after = time.time()
 
-        :return: void
-        '''
-        assert self.optimal_confidence_value != None
-
-        pass
+        return (accuracy, after - before)
 
 class Graph():
     '''
