@@ -70,3 +70,7 @@ This is potentially a bottleneck for very large n.
 
 - Assuming case where visited nodes forms a border between simpler and more complex nodes is improbable because search time constraint is constant. 
 Possibility can still happen due to randomness.
+
+## Future work
+- Remove any models with higher time and worse accuracy than any other model   
+    - Sort by complexity, loop backwards recording min time and if encounter current model with time larger than min, remove that node.
