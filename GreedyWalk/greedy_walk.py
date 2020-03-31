@@ -3,30 +3,6 @@ import time
 
 import GreedyWalk.graph as Graph
 
-def get_optimal_confidence_value_grid(node, dataset, model_time_constraint, step_size = 0.1):
-    '''
-    For each possible confidence value between 0 and 1 with input step_size, run the 
-    node with the current confidence value. Store the confidence_value that gives the best accuracy
-    within the input time constraint.
-    '''
-    confidence_values = np.arange(0, 1.1, 0.1)
-    best_confidence_value = 0
-    best_accuracy = 0
-    for conf_value in confidence_values:
-        before = time.time()
-        current_accuracy = node.accuracy(dataset, conf_value)
-        after = time.time()
-
-        if after - before < model_time_constraint:
-            if current_accuracy > best_accuracy:
-                best_accuracy = current_accuracy
-                best_confidence_value = conf_value
-    
-    return best_confidence_value
-
-def get_optimal_confidence_value_random():
-    pass
-
 def greedy_walk(graph, search_time_constraint, model_time_constraint, \
                 validation_dataset, conf_value_dataset, epsilon = 0.1):
     '''
@@ -47,31 +23,40 @@ def greedy_walk(graph, search_time_constraint, model_time_constraint, \
 
     current_node = graph.get_most_simple_node()
 
-    best_node_so_far = current_node
+    best_node_so_far = None
     best_accuracy_so_far = 0
 
     while time.time() < timeout_start + search_time_constraint:
         graph.mark_node_visited(current_node)
 
+        # Find current node's optimal confidence value.
+        satisfy_model_time_constraint = \
+            current_node.find_and_set_optimal_confidence_value_grid(conf_value_dataset, \
+                                                                    model_time_constraint)
+
+        if satisfy_model_time_constraint:
+            # Get the current node's test time and test accuracy using the optimal
+            # confidence value on the validation dataset. If test time satisfies
+            # the input model constraint and the test accuracy is better than
+            # best_accuracy_so_far, update the variables.
+            test_accuracy, test_time = current_node.get_accuracy_and_time_optimal_conf(validation_dataset)
+            
+            if test_time < model_time_constraint:
+                best_node_so_far = current_node
+                best_accuracy_so_far = test_accuracy
+
+        # Select neighbor
         prob = np.random.random()
         if prob < epsilon:
             current_node = graph.get_random_neighbor_pairing(current_node)
         else:
-            current_optimal_conf_value = get_optimal_confidence_value_random(current_node, \
-                                                    conf_value_dataset, model_time_constraint)
-            current_node.optimal_confidence_value = current_optimal_conf_value
-
-            # Test model pairing with current_optimal_conf_value
-            current_node.set_optimal_time_and_accuracy(validation_dataset)
-
-            if current_node.optimal_test_time < model_time_constraint:
-                if current_node.optimal_test_accuracy > best_accuracy_so_far:
-                    best_node_so_far = current_node
+            if satisfy_model_time_constraint:
                 current_node = graph.get_neighbor_greater_complexity(current_node)
             else:
                 current_node = graph.get_neighbor_smaller_complexity(current_node)
 
-        if current_node == None: # Traversed entire graph space
+        # Traversed all nodes can traverse (may not be entire graph depending on visited set).
+        if current_node == None:
             break
 
     return best_node_so_far
@@ -80,7 +65,7 @@ def naive_search():
     pass
 
 def main():
-    # Get MNIST data and split train-test 0.7-0.3
+    # Get MNIST data and split train-test 0.8-0.2
 
     # Train each of the models and store as Graph.Model object (with corresponding complexity)
 
