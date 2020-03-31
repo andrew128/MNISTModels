@@ -105,7 +105,7 @@ class Node():
         accuracy = self.accuracy(inputs, labels, self.optimal_confidence_value)
         after = time.time()
 
-        print('accuracy', accuracy, 'time', after - before, 'conf', self.optimal_confidence_value)
+        # print('accuracy', accuracy, 'time', after - before, 'conf', self.optimal_confidence_value)
         return (accuracy, after - before)
 
 class Graph():
