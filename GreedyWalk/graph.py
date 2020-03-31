@@ -62,8 +62,8 @@ class Node():
         '''
         :return: float - Get the accuracy of this combined model with the given confidence value.
         '''
-        simple_model = self.model_1 if np.argmin(self.complexities) == 0 else self.model_2
-        complex_model = self.model_2 if np.argmin(self.complexities) == 0 else self.model_1
+        simple_model = self.model_1.model if np.argmin(self.complexities) == 0 else self.model_2.model
+        complex_model = self.model_2.model if np.argmin(self.complexities) == 0 else self.model_1.model
 
         # -----------------------------------
         # All Simple
@@ -81,7 +81,7 @@ class Node():
         if complex_inputs.shape[0] == 0:
             complex_preds = []
         else:
-            complex_preds = np.argmax(self.trained_complex_all_digit_model.predict(complex_inputs), axis=1)
+            complex_preds = np.argmax(complex_model.predict(complex_inputs), axis=1)
         # -----------------------------------
         # Select simple
         simple_indices = np.where(simple_highest_probs >= conf_value, indices, None)
@@ -105,6 +105,7 @@ class Node():
         accuracy = self.accuracy(inputs, labels, self.optimal_confidence_value)
         after = time.time()
 
+        print('accuracy', accuracy, 'time', after - before, 'conf', self.optimal_confidence_value)
         return (accuracy, after - before)
 
 class Graph():
@@ -116,7 +117,10 @@ class Graph():
     Graph also offers methods to to get node pairings and neighboring node
     pairings.
 
-    NOTE: It is not possible to add models to the Graph after initialization.
+    NOTE:
+    - It is not possible to add models to the Graph after initialization.
+    - model complexities must start from 0 and each complexity in [0, n-1]
+      where n is the # of models must be present
     '''
     def __init__(self, models):
         '''
@@ -141,6 +145,16 @@ class Graph():
         for i in range(self.num_models):
             self.visited[(i, i)] = None
 
+    def print_visited(self):
+        for i in range(self.num_models):
+            for j in range(self.num_models):
+                if (i, j) in self.visited or (j, i) in self.visited:
+                    print('X', end=' ')
+                else:
+                    print('_', end=' ')
+
+            print()
+        print()
 
     def __add_models(self, models):
         for model in models:
