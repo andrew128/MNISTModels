@@ -7,3 +7,4 @@ researchEnv
 ./v3/models
 ./v3/models_old
 pytorch-exp/data/
+./GreedyWalk/models/

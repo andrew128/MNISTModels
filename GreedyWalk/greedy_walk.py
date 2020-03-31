@@ -127,7 +127,7 @@ def main():
 
     # Load saved models and store as Graph.Model object (with corresponding complexity)
     print('Storing models in Graph object...')
-    models = []
+    models_list = []
     for i in range(1, 4):
         current_model = tf.keras.models.load_model('models/l' + str(i) + '_model')
         current_model_object = Graph.Model(current_model)
@@ -142,10 +142,10 @@ def main():
         print('complexity_index:', current_model_object.complexity_index, \
             'accuracy:', current_model_object.accuracy, 'time: ', current_model_object.time)
 
-        models.append(current_model_object)
+        models_list.append(current_model_object)
 
     # Create graph object and add models sorted based on complexity
-    graph = Graph.Graph(models)
+    graph = Graph.Graph(models_list)
 
     # Call GreedyWalk
     print('Running Greedy Walk...')
