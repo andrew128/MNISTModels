@@ -15,7 +15,7 @@ GreedyWalk's purpose is to find the model pairing that achieves the highest accu
 
 - mention dividing dataset into four parts (training, individual testing to sort, conf, validation)
 ## How to Run
-
+`source researchEnv/bin/activate`
 `python3 greedy_walk.py`
 
 ## Directory Structure

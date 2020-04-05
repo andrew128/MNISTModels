@@ -196,17 +196,18 @@ def main():
         print('Running Greedy Walk...')
 
         greedy_output = []
-        for current_model_search_time in np.arange(0.2, 0.5, 0.05):
-            print("=========================================================")
-            print("Greedy:", current_model_search_time)
-            output, search_time, best_node_accuracy = greedy_walk(graph, 20, \
-                    current_model_search_time, x_test_2, y_test_2, x_test_3, y_test_3)
-            if output == None:
-                print('Greedy walk did not find any viable pairing')
-                greedy_output.append(None)
-            else:
-                print('Greedy walk found', output.complexities, 'in', search_time, 'seconds')
-                greedy_output.append((output.complexities, search_time, best_node_accuracy))
+        # for current_model_search_time in np.flip(np.arange(0.2, 0.5, 0.05)):
+        print("=========================================================")
+        current_model_search_time = 0.45
+        print("Greedy:", current_model_search_time)
+        output, search_time, best_node_accuracy = greedy_walk(graph, 20, \
+                current_model_search_time, x_test_2, y_test_2, x_test_3, y_test_3)
+        if output == None:
+            print('Greedy walk did not find any viable pairing')
+            greedy_output.append(None)
+        else:
+            print('Greedy walk found', output.complexities, 'in', search_time, 'seconds')
+            greedy_output.append((output.complexities, search_time, best_node_accuracy, output.optimal_confidence_value))
 
         print(greedy_output)
 
@@ -214,17 +215,18 @@ def main():
     # Running Naive:
     if run_naive:
         naive_output = []
-        for current_model_search_time in np.arange(0.2, 0.3, 0.01):
-            print("=========================================================")
-            print("Naive:", current_model_search_time)
-            output, search_time, best_node_accuracy = naive_search(models_list, current_model_search_time,\
-                    x_test_2, y_test_2, x_test_3, y_test_3)
-            if output == None:
-                print('Naive did not any find viable pairing')
-                naive_output.append(None)
-            else:
-                print('Naive found', output.complexities, 'in', search_time, 'seconds')
-                naive_output.append((output.complexities, search_time, best_node_accuracy))
+        # for current_model_search_time in np.arange(0.2, 0.5, 0.05):
+        current_model_search_time = 0.35
+        print("=========================================================")
+        print("Naive:", current_model_search_time)
+        output, search_time, best_node_accuracy = naive_search(models_list, current_model_search_time,\
+                x_test_2, y_test_2, x_test_3, y_test_3)
+        if output == None:
+            print('Naive did not any find viable pairing')
+            naive_output.append(None)
+        else:
+            print('Naive found', output.complexities, 'in', search_time, 'seconds')
+            naive_output.append((output.complexities, search_time, best_node_accuracy, output.optimal_confidence_value))
 
         print(naive_output)
 
