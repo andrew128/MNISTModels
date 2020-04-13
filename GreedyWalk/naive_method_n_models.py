@@ -1,14 +1,17 @@
 import numpy as np
 import onnx
 import os
+import time
 import glob
-import helpers.helper_funcs as helpers
 import warnings
-from onnx_tf.backend import prepare
+from copy import deepcopy
 
+from onnx_tf.backend import prepare
 from onnx import numpy_helper
 
 import tensorflow as tf
+
+import helpers.helper_funcs as helpers
 
 def imagenet_postprocess(scores): 
     '''
@@ -74,11 +77,14 @@ def run_model(tf_rep, test_data_dir='onnx_models/mobilenetv2-1.0/test_data_set_0
     # Run the model on the backend
     outputs = tf_rep.run(inputs)[0]
 
-    outputs = imagenet_postprocess(outputs)
+
+    np.save('model_prediction_not_processed', outputs)
+    # outputs = imagenet_postprocess(outputs)
     # print(outputs[:10,:])
     print(outputs.shape)
     # print(outputs[0,0])
-    print(outputs[:10])
+    print(outputs)
+    # np.save('model_prediction', outputs)
 
     # Compare the results with reference outputs.
     # i = 0
@@ -141,12 +147,13 @@ def get_optimal_conf_values(models, time_constraint, conf_value_inputs, conf_val
 def get_optimal_conf_values_helper(models, conf_values, curr_index, time_constraint,\
                                      conf_value_inputs, conf_value_labels):
     '''
-    Return array of optimal confidence values
+    Return accuracy and array of optimal confidence values and None, None
+    if no set of confidence values found that runs within the optimal time constraint.
     '''
     if curr_index == len(conf_values):
         # Run models with conf_values and return accuracy, none if doesn't satisfy time constraint
         # also return corresponding conf values
-        accuracy, time = run(models, conf_values)
+        accuracy, time = run_combined(models, conf_values, conf_value_inputs, conf_value_labels)
         if time < time_constraint:
             return accuracy, np.copy(conf_values) # TODO: think if there is any way to get rid of copy
         else:
@@ -166,11 +173,71 @@ def get_optimal_conf_values_helper(models, conf_values, curr_index, time_constra
         return best_accuracy, best_conf_values
 
 def get_all_model_combinations(n):
-    pass
+    '''
+    Output is a list of lists.
+    '''
+    output_list = []
+    get_all_model_combinations_helper(n, [], 0, output_list)
+    return output_list
 
-def run(models, conf_values):
+def get_all_model_combinations_helper(n, current_list, i, output_list):
+    '''
+    Return void
+    '''
+    if i == n:
+        output_list.append(deepcopy(current_list))
+    else:
+        get_all_model_combinations_helper(n, current_list, i + 1, output_list)
+        current_list.append(i)
+        get_all_model_combinations_helper(n, current_list, i + 1, output_list)
+        current_list.remove(i)
+
+def run_single(model, inputs):
+    return model.run(inputs)[0]
+
+def run_combined(models, conf_values, inputs, labels):
     assert len(models) - 1 == conf_values
-    pass
+    before_time = time.time()
+    current_inputs_under_consideration = inputs
+
+    combined_preds = np.arange(inputs.shape[0])
+
+    for index, model in enumerate(models):
+        # Separate out the inputs that current model will run and the 
+        # inputs that the remaining group of models will consider.
+        current_probs = run_single(model, current_inputs_under_consideration)
+        current_conf_value = conf_values[index]
+
+        current_highest_probs = np.amax(current_probs, axis=1)
+
+        indices = [i for i in range(inputs.shape[0])]
+
+        # Make predictions with current model and append to combined_predictions
+        current_indices = np.where(current_highest_probs >= current_conf_value, indices, None)
+        current_indices = current_indices[current_indices != np.array(None)] # remove None values
+        current_indices = np.asarray(current_indices, dtype=np.int64)
+
+        reduced_current_probs = np.take(current_probs, current_indices, axis=0)
+        current_preds = reduced_current_probs.argmax(axis=1)
+
+        np.put(combined_preds, current_indices, current_preds)
+
+        # Deal with remaining model work
+        remaining_indices = np.where(current_highest_probs < current_conf_value, indices, None)
+        remaining_indices = remaining_indices[remaining_indices != np.array(None)] # remove None values
+        remaining_indices = np.asarray(remaining_indices, dtype=np.int64)
+
+        remaining_inputs = np.take(inputs, remaining_indices, axis=0)
+
+        if remaining_inputs.shape[0] == 0:
+            break
+        else:
+            current_inputs_under_consideration = \
+                np.hstack((current_inputs_under_consideration, remaining_inputs))
+
+    # Return accuracy of combined predictions and overall run time
+    return tf.reduce_mean(tf.cast(tf.equal(combined_preds, labels),\
+         tf.float32)).numpy(), time.time() - before_time
 
 def naive_search(models, validation_inputs, validation_labels,\
                  conf_value_inputs, conf_value_labels, input_time_constraint):
@@ -191,12 +258,15 @@ def naive_search(models, validation_inputs, validation_labels,\
 
     # Loop through each model combination to find the optimal confidence value for each.
     for model_combination in all_model_combinations:
+        if len(model_combination) == 0:
+            continue
         input_models = np.take(model_combination, models)
-        conf_values = get_optimal_conf_values(input_models)
+        conf_values = get_optimal_conf_values(input_models, input_time_constraint,\
+             conf_value_inputs, conf_value_labels)
 
         # Test model combination with optimal confidence values    
-        accuracy, _ = run(input_models, conf_values)
-        if accuracy > best_accuracy:
+        accuracy, time = run_combined(input_models, conf_values, validation_inputs, validation_labels)
+        if time <= input_time_constraint and accuracy > best_accuracy:
             best_combination = model_combination
 
     # Record best model combination
@@ -205,9 +275,14 @@ def naive_search(models, validation_inputs, validation_labels,\
 def main():
     warnings.filterwarnings('ignore') # Ignore all the warning messages 
 
-    get_data()
+    # output = np.load('model_prediction.npy')
+    # unique = np.unique(output)
+    # print(len(unique))
+    # naive_search()
 
-    # run_model(alexnet())
+    # get_data()
+
+    run_model(alexnet())
     # run_model(vggnet())
     # run_model(squeezenet())
     # run_model(resnet())
