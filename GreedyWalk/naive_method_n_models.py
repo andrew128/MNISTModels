@@ -94,7 +94,7 @@ def run_model(tf_rep, test_data_dir='onnx_models/mobilenetv2-1.0/test_data_set_0
         # print(np.allclose(ref_o, o, atol=1e-3, rtol=1e-3))
         # np.testing.assert_almost_equal(ref_o, o, decimal=5)
 
-def get_data():
+def get_sample_data():
     '''
     Combine all input_*.pb files and output_*.pb files into a 
     dictionary with key being the "model.test_dir_number_x" and 
@@ -272,8 +272,75 @@ def naive_search(models, validation_inputs, validation_labels,\
     # Record best model combination
     return best_combination
 
+def save_class_labels(synset_mapping_file):
+    '''
+    Saves the synset mapping as a npy file
+    n* -> label
+    '''
+    idToLabel = {}
+    with open(synset_mapping_file) as fp:
+        line = fp.readline()
+        cnt = 1
+        while line:
+            idToLabel[line.split(' ')[0]] = cnt
+            cnt += 1
+
+            line = fp.readline()
+
+    np.save('synset_map', idToLabel)
+
+def get_imagenet_validation_data(validation_data):
+    '''
+    Save map from filename (ILSVRC_2012_val_*) -> n* 
+    Removes images with duplicates
+    '''
+    fileNameToID = {}
+    with open(validation_data) as fp:
+        line = fp.readline() # Read past the first line (header)
+        line = fp.readline()
+        cnt = 1
+        while line:
+            # print(line, '!!!')
+            split_line = line.split(',')
+            bounding_box_data = split_line[1].split(' ')
+            # print(bounding_box_data)
+            # Filter out images with multiple detectable objects
+            if len(bounding_box_data) != 6:
+                line = fp.readline()
+                continue
+
+            fileNameToID[split_line[0]] = bounding_box_data[0]
+
+            line = fp.readline()
+            if cnt < 10:
+                print(cnt, split_line[0], bounding_box_data[0])
+            # print(cnt)
+            cnt += 1
+
+    np.save('fileNameToID', fileNameToID)
+
 def main():
     warnings.filterwarnings('ignore') # Ignore all the warning messages 
+
+    # ---------------------
+    # preprocessed_image = imagenet_preprocess('./ILSVRC2012_val_00011239.JPEG')
+    preprocessed_image = np.load('x_val.npy').reshape(1, 3, 224, 224)
+    print(preprocessed_image.shape)
+    # print(preprocessed_image)
+    # alexnet = alexnet()
+    outputs = alexnet().run(preprocessed_image)[0]
+    print(outputs)
+    print(outputs.shape)
+
+    # ---------------------
+
+    # save_class_labels('LOC_synset_mapping.txt')
+    # idToLabel = np.load('synset_map.npy', allow_pickle=True)
+    # print(idToLabel)
+
+    # get_imagenet_validation_data('LOC_val_solution.csv')
+    # fileNameToID = np.load('fileNameToID.npy', allow_pickle=True)
+    # print(fileNameToID)
 
     # output = np.load('model_prediction.npy')
     # unique = np.unique(output)
@@ -282,7 +349,7 @@ def main():
 
     # get_data()
 
-    run_model(alexnet())
+    # run_model(alexnet())
     # run_model(vggnet())
     # run_model(squeezenet())
     # run_model(resnet())
