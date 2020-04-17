@@ -18,26 +18,27 @@ def humansize(nbytes):
     return '%s %s' % (f, suffixes[i])
 
 # Preprocess images
-fns = os.listdir("data/val")
+fns = os.listdir("imagenet_sample_data")
 fns.sort()
 fns = [
-    "data/val/" + fn
+    "imagenet_sample_data/" + fn
     for fn in fns
 ]
 
 x_val = np.zeros((len(fns), 224, 224, 3), dtype=np.float32)
 print(humansize(x_val.nbytes))
 
-
-# %%time
-
+print('Right before for loop')
 for i in range(len(fns)):
     if i %2000 == 0:
         print("%d/%d" % (i, len(fns)))
     
+    print('Loading image...')
     # Load (as BGR)
     img = cv2.imread(fns[i])
     
+    # print('i', img.shape)
+
     # Resize
     height, width, _ = img.shape
     new_height = height * 256 // min(img.shape[:2])
@@ -53,5 +54,6 @@ for i in range(len(fns)):
     
     # Save (as RGB)
     x_val[i,:,:,:] = img[:,:,::-1]
+    # print(x_val)
 
-np.save("data/x_val.npy", x_val)
+np.save("x_val.npy", x_val)
