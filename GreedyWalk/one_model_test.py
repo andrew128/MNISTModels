@@ -20,9 +20,19 @@ class OnnxModel():
 
     def run_model(self, input_data):
         # preprocessed_images = input_data.reshape(self.input_shape)
-        scores = self.model.run(input_data)[0]
-        probs = tf.nn.softmax(scores).numpy()
-        return probs
+
+        all_probs = None
+
+        for i in range(input_data[0]):
+            current_input = np.expand_dims(input_data[i], axis=0)
+            scores = self.model.run(current_input)[0]
+            probs = tf.nn.softmax(scores).numpy()
+
+            if i == 0:
+                all_probs = probs
+            else:
+                all_probs = np.stack(all_probs, probs)
+        return all_probs
 
 def mobilenet():
     '''
@@ -81,21 +91,21 @@ def main():
 
     nonzero_inputs = nonzero_inputs.reshape(num_inputs, 3, 224, 224)
     # -----------------------------
-    mobilenet_model = OnnxModel(mobilenet(), "mobilenet")
+    # mobilenet_model = OnnxModel(mobilenet(), "mobilenet")
 
-    output = mobilenet_model.run_model(nonzero_inputs)
-    np.save('mobilenet_predictions.npy', output)
-    print('mobilenet:')
-    print(output.shape)
-    print(np.sum(output))
-    # -----------------------------
-    resnet_model = OnnxModel(resnet(), "resnet")
+    # output = mobilenet_model.run_model(nonzero_inputs)
+    # np.save('mobilenet_predictions.npy', output)
+    # print('mobilenet:')
+    # print(output.shape)
+    # print(np.sum(output))
+    # # -----------------------------
+    # resnet_model = OnnxModel(resnet(), "resnet")
 
-    output = resnet_model.run_model(nonzero_inputs)
-    np.save('mobilenet_predictions.npy', output)
-    print('resnet:')
-    print(output.shape)
-    print(np.sum(output))
+    # output = resnet_model.run_model(nonzero_inputs)
+    # np.save('mobilenet_predictions.npy', output)
+    # print('resnet:')
+    # print(output.shape)
+    # print(np.sum(output))
     # -----------------------------
     squeezenet_model = OnnxModel(squeezenet(), "squeezenet")
 
@@ -113,13 +123,13 @@ def main():
     # print(output.shape)
     # print(np.sum(output))
     # -----------------------------
-    alexnet_model = OnnxModel(alexnet(), "alexnet")
+    # alexnet_model = OnnxModel(alexnet(), "alexnet")
 
-    output = alexnet_model.run_model(nonzero_inputs)
-    np.save('mobilenet_predictions.npy', output)
-    print('Alexnet:')
-    print(output.shape)
-    print(np.sum(output))
+    # output = alexnet_model.run_model(nonzero_inputs)
+    # np.save('mobilenet_predictions.npy', output)
+    # print('Alexnet:')
+    # print(output.shape)
+    # print(np.sum(output))
 
 if __name__ == '__main__':
     main()
