@@ -36,32 +36,32 @@ def resnet():
     input: float[N, 3, 224, 224]
     output: scores
     '''
-    return prepare(onnx.load('onnx_models/resnet18v1/resnet18v1.onnx'))
+    return prepare(onnx.load('resnet18v1.onnx'))
 
 def squeezenet():
     '''
     input: float[N, 3, 224, 224]
     output: scores
     '''
-    return prepare(onnx.load('onnx_models/squeezenet1.1/squeezenet1.1.onnx'))
+    return prepare(onnx.load('squeezenet1.1.onnx'))
 
 def vggnet():
     '''
     input: float[N, 3, 224, 224]
     output: scores
     '''
-    return prepare(onnx.load('onnx_models/vgg16/vgg16.onnx'))
+    return prepare(onnx.load('vgg16.onnx'))
 
 def alexnet():
     '''
     input: float[1, 3, 224, 224]
     output: float[1, 1000]
     '''
-    return prepare(onnx.load('onnx_models/bvlc_alexnet/model.onnx'))
+    return prepare(onnx.load('model.onnx'))
 
-def run_model(model, model_name, inputs):
-    output = model.run(inputs)[0]
-    np.save('model_' + model_name, output, allow_pickle=True)
+# def run_model(model, model_name, inputs):
+#     output = model.run(inputs)[0]
+#     np.save('model_' + model_name, output, allow_pickle=True)
 
 def main():
     warnings.filterwarnings('ignore') # Ignore all the warning messages 
@@ -73,6 +73,7 @@ def main():
 
     # Get indices where labels exist
     nonzero_indices = np.nonzero(input_labels[:, 0])
+    nonzero_indices = np.squeeze(nonzero_indices)
     nonzero_labels = input_labels[nonzero_indices]
     nonzero_inputs = input_data[nonzero_indices]
     # -----------------------------
