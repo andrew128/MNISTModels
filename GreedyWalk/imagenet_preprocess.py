@@ -18,10 +18,10 @@ def humansize(nbytes):
     return '%s %s' % (f, suffixes[i])
 
 # Preprocess images
-fns = os.listdir("imagenet_sample_data")
+fns = os.listdir("./val_subset")
 fns.sort()
 fns = [
-    "imagenet_sample_data/" + fn
+    "val_subset/" + fn
     for fn in fns
 ]
 
@@ -56,4 +56,4 @@ for i in range(len(fns)):
     x_val[i,:,:,:] = img[:,:,::-1]
     # print(x_val)
 
-np.save("x_val.npy", x_val)
+np.save("val_inputs_10000.npy", x_val)
