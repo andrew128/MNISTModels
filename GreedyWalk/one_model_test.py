@@ -66,6 +66,8 @@ def alexnet():
 def main():
     warnings.filterwarnings('ignore') # Ignore all the warning messages 
 
+    num_inputs = 7690
+
     input_data_file = 'val_inputs_10000.npy'
     input_data = np.load(input_data_file)
     input_labels_file = 'val_labels_10000.npy'
@@ -77,7 +79,7 @@ def main():
     nonzero_labels = input_labels[nonzero_indices]
     nonzero_inputs = input_data[nonzero_indices]
 
-    nonzero_inputs = nonzero_inputs.reshape(1, 3, 224, 224)
+    nonzero_inputs = nonzero_inputs.reshape(num_inputs, 3, 224, 224)
     # -----------------------------
     mobilenet_model = OnnxModel(mobilenet(), "mobilenet")
 
