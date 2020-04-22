@@ -29,7 +29,7 @@ def mobilenet():
     input: float[N, 3, 224, 224]
     output: scores
     '''
-    return prepare(onnx.load('onnx_models/mobilenetv2-1.0/mobilenetv2-1.0.onnx'))
+    return prepare(onnx.load('mobilenetv2-1.0.onnx'))
 
 def resnet():
     '''
@@ -101,13 +101,13 @@ def main():
     print(output.shape)
     print(np.sum(output))
     # -----------------------------
-    vggnet_model = OnnxModel(vggnet(), "vggnet")
+    # vggnet_model = OnnxModel(vggnet(), "vggnet")
 
-    output = vggnet_model.run_model(nonzero_inputs)
-    np.save('mobilenet_predictions.npy', output)
-    print('vggnet:')
-    print(output.shape)
-    print(np.sum(output))
+    # output = vggnet_model.run_model(nonzero_inputs)
+    # np.save('mobilenet_predictions.npy', output)
+    # print('vggnet:')
+    # print(output.shape)
+    # print(np.sum(output))
     # -----------------------------
     alexnet_model = OnnxModel(alexnet(), "alexnet")
 
