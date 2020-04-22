@@ -19,8 +19,8 @@ class OnnxModel():
         self.normalize = False
 
     def run_model(self, input_data):
-        preprocessed_images = input_data.reshape(self.input_shape)
-        scores = self.model.run(preprocessed_images)[0]
+        # preprocessed_images = input_data.reshape(self.input_shape)
+        scores = self.model.run(input_data)[0]
         probs = tf.nn.softmax(scores).numpy()
         return probs
 
@@ -76,6 +76,8 @@ def main():
     nonzero_indices = np.squeeze(nonzero_indices)
     nonzero_labels = input_labels[nonzero_indices]
     nonzero_inputs = input_data[nonzero_indices]
+
+    nonzero_inputs = nonzero_inputs.reshape(1, 3, 224, 224)
     # -----------------------------
     mobilenet_model = OnnxModel(mobilenet(), "mobilenet")
 
