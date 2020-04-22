@@ -14,8 +14,9 @@ def main():
     output = np.zeros((10000, 1))
     for i, fn in enumerate(fns):
         fn = os.path.splitext(fn)[0]
-        print(fn, fileNameToID[fn], idToLabel[fileNameToID[fn]])
-        output[i] = idToLabel[fileNameToID[fn]]
+        if fn in fileNameToID:
+            print(fn, fileNameToID[fn], idToLabel[fileNameToID[fn]])
+            output[i] = idToLabel[fileNameToID[fn]]
     
     nparray = np.asarray(output)
 
