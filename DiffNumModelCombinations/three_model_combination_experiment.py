@@ -10,15 +10,13 @@ def run_combinations(simple_model, complex_model, most_complex_model, x_data, y_
     Attempt all confidence values in 0:0.1:1
     Store accuracy and time for each confidence value
     '''
-    conf_values = np.arange(0.1, 1, 0.1)
+    conf_values = np.arange(0, 1.1, 0.1)
 
     all_conf_values = []
     accuracies = []
     times = []
     for conf_value_1 in conf_values:
         for conf_value_2 in conf_values:
-            # conf_value_1 = 0.3
-            # conf_value_2 = 0.1
             current_conf_values = [conf_value_1, conf_value_2]
             all_conf_values.append(current_conf_values)
             print("Confidence Values", conf_value_1, conf_value_2)
