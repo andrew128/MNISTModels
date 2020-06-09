@@ -34,7 +34,8 @@ def run_combinations(simple_model, complex_model, x_data, y_data):
     Attempt all confidence values in 0:0.1:1
     Store accuracy and time for each confidence value
     '''
-    conf_values = np.arange(0, 1.1, 0.1)
+    conf_values = np.arange(0, 1.0, 0.1)
+    conf_values = np.append(conf_values, np.arange(0.91, 1.01, 0.01));
 
     accuracies = []
     times = []
@@ -89,7 +90,7 @@ def main():
     print('Loading data...')
     x_train, y_train, x_test, y_test = helpers.get_mnist_data()
 
-    # train_and_save_models(x_train, y_train)
+    #train_and_save_models(x_train, y_train)
 
     print("Loading models...")
     # l0_model = tf.keras.models.load_model('models/l0_model')
@@ -98,40 +99,71 @@ def main():
     l3_model = tf.keras.models.load_model('models/l3_model')
     # l4_model = tf.keras.models.load_model('models/l4_model')
 
-    # before_time = time.time()
-    # accuracy = l0_model.evaluate(x_test, y_test)
-    # print("Time", time.time() - before_time)
+    l1_time = 0
+    l2_time = 0
+    l3_time = 0
 
-    before_time = time.time()
-    accuracy = l1_model.evaluate(x_test, y_test)
-    print("Time", time.time() - before_time)
+    for i in range(5):
+        before_time = time.time()
+        accuracy = l1_model.evaluate(x_test, y_test)
+        l1_time += time.time() - before_time
 
-    before_time = time.time()
-    accuracy = l2_model.evaluate(x_test, y_test)
-    print("Time", time.time() - before_time)
+        before_time = time.time()
+        accuracy = l2_model.evaluate(x_test, y_test)
+        l2_time += time.time() - before_time
 
-    before_time = time.time()
-    accuracy = l3_model.evaluate(x_test, y_test)
-    print("Time", time.time() - before_time)
+        before_time = time.time()
+        accuracy = l3_model.evaluate(x_test, y_test)
+        l3_time += time.time() - before_time
 
-    # before_time = time.time()
-    # accuracy = l4_model.evaluate(x_test, y_test)
-    # print("Time", time.time() - before_time)
+    print("L1 Time:", l1_time / 5)
+    print("L2 Time:", l2_time / 5)
+    print("L3 Time:", l3_time / 5)
 
-    print("Run l1 l2...")
-    accuracies, times = run_combinations(l1_model, l2_model, x_test, y_test)
-    print(accuracies)
-    print(times)
+    l1_l2_accuracies = []
+    l1_l3_accuracies = []
+    l2_l3_accuracies = []
+    l1_l2_times = []
+    l1_l3_times = []
+    l2_l3_times = []
 
-    print("Run l1 l3...")
-    accuracies, times = run_combinations(l1_model, l3_model, x_test, y_test)
-    print(accuracies)
-    print(times)
+    for i in range(5):
+        print("Run l1 l2... #" + str(i))
+        accuracies, times = run_combinations(l1_model, l2_model, x_test, y_test)
+        l1_l2_accuracies.append(accuracies)
+        l1_l2_times.append(times)
 
-    print("Run l2 l3...")
-    accuracies, times = run_combinations(l2_model, l3_model, x_test, y_test)
-    print(accuracies)
-    print(times)
+        print("Run l1 l3... #" + str(i))
+        accuracies, times = run_combinations(l1_model, l3_model, x_test, y_test)
+        l1_l3_accuracies.append(accuracies)
+        l1_l3_times.append(times)
+
+        print("Run l2 l3... #" + str(i))
+        accuracies, times = run_combinations(l2_model, l3_model, x_test, y_test)
+        l2_l3_accuracies.append(accuracies)
+        l2_l3_times.append(times)
+
+    print("L1 L2 Accuracies:", np.mean(l1_l2_accuracies, axis=0))
+    print("L1 L2 Times:", np.mean(l1_l2_times, axis=0))
+    print("L1 L3 Accuracies:", np.mean(l1_l3_accuracies, axis=0))
+    print("L1 L3 Times:", np.mean(l1_l3_times, axis=0))
+    print("L2 L3 Accuracies:", np.mean(l2_l3_accuracies, axis=0))
+    print("L2 L3 Times:", np.mean(l2_l3_times, axis=0))
+
+    # print("Run l1 l2...")
+    # accuracies, times = run_combinations(l1_model, l2_model, x_test, y_test)
+    # print(accuracies)
+    # print(times)
+
+    # print("Run l1 l3...")
+    # accuracies, times = run_combinations(l1_model, l3_model, x_test, y_test)
+    # print(accuracies)
+    # print(times)
+
+    # print("Run l2 l3...")
+    # accuracies, times = run_combinations(l2_model, l3_model, x_test, y_test)
+    # print(accuracies)
+    # print(times)
 
 if __name__ == '__main__':
     main()

@@ -129,11 +129,18 @@ def main():
     # accuracy = l4_model.evaluate(x_test, y_test)
     # print("Time", time.time() - before_time)
 
-    print("Running l1, l2, l3")
-    all_conf_values, accuracies, times = run_combinations(l1_model, l2_model, l3_model, x_test, y_test)
-    print(all_conf_values)
-    print(accuracies)
-    print(times)
+    all_model_accuracies = []
+    all_model_times = []
+
+    for i in range(5):
+        print("Run l1 l2 l3... #" + str(i))
+        all_conf_values, accuracies, times = run_combinations(l1_model, l2_model, l3_model, x_test, y_test)
+        all_model_accuracies.append(accuracies)
+        all_model_times.append(times)
+
+    print("All Conf Values:", all_conf_values)
+    print("L1 L2 L3 Accuracies:", np.mean(all_model_accuracies, axis=0))
+    print("L1 L2 L3 Times:", np.mean(all_model_times, axis=0))
 
 if __name__ == '__main__':
     main()

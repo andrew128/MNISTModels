@@ -99,7 +99,7 @@ def get_untrained_l1_all_digit_model():
     # Creating a Sequential Model and adding the layers
     model = Sequential()
     model.add(Flatten()) # Flattening the 2D arrays for fully connected layers
-    model.add(Dense(256, activation=tf.nn.relu))
+    model.add(Dense(32, activation=tf.nn.relu))
     model.add(Dropout(0.2))
     model.add(Dense(10,activation=tf.nn.softmax))
     model.compile(optimizer='adam', 
