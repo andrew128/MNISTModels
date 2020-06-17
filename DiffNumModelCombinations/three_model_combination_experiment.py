@@ -15,19 +15,23 @@ def run_combinations(simple_model, complex_model, most_complex_model, x_data, y_
     all_conf_values = []
     accuracies = []
     times = []
+    simple_percents = []
+    complex_percents = []
     for conf_value_1 in conf_values:
         for conf_value_2 in conf_values:
             current_conf_values = [conf_value_1, conf_value_2]
             all_conf_values.append(current_conf_values)
             print("Confidence Values", conf_value_1, conf_value_2)
-            accuracy, time = run_combined(simple_model, complex_model, most_complex_model,\
+            accuracy, time, simple_percent, complex_percent = run_combined(simple_model, complex_model, most_complex_model,\
                  x_data, y_data, conf_value_1, conf_value_2)
 
             print("accuracy:", accuracy, "time:", time)
             accuracies.append(accuracy)
             times.append(time)
+            simple_percents.append(simple_percent)
+            complex_percents.append(complex_percent)
     
-    return all_conf_values, accuracies, times
+    return all_conf_values, accuracies, times, simple_percents, complex_percents
 
 def run_combined(simple_model, complex_model, most_complex_model, inputs, labels, conf_value_1, conf_value_2):
     '''
@@ -52,38 +56,42 @@ def run_combined(simple_model, complex_model, most_complex_model, inputs, labels
     # -----------------------------------
     # Complex predictions: get inputs of complex predictions
     complex_indices = np.zeros(0)
-    if simple_indices.shape[0] < len(indices):
-        complex_indices = np.where(simple_highest_probs < conf_value_1, indices, None)
-        complex_indices = complex_indices[complex_indices != np.array(None)] # remove None values
-        complex_indices = np.asarray(complex_indices, dtype=np.int64)
+    complex_indices = np.where(simple_highest_probs < conf_value_1, indices, None)
+    complex_indices = complex_indices[complex_indices != np.array(None)] # remove None values
+    complex_indices = np.asarray(complex_indices, dtype=np.int64)
 
-        print('complex indices', complex_indices.shape)
+    print('complex indices', complex_indices.shape)
 
-        complex_inputs = np.take(inputs, complex_indices, axis=0)
-        complex_highest_probs = None
-        if complex_inputs.shape[0] == 0:
-            complex_preds = []
-        else:
-            complex_probs = complex_model.predict(complex_inputs)
-            complex_highest_probs = np.amax(complex_probs, axis=1)
-            complex_preds = np.argmax(complex_probs, axis=1)
+    complex_inputs = np.take(inputs, complex_indices, axis=0)
+    complex_highest_probs = None
+    if complex_inputs.shape[0] == 0:
+        complex_preds = []
+    else:
+        complex_probs = complex_model.predict(complex_inputs)
+        complex_highest_probs = np.amax(complex_probs, axis=1)
+        # reduced_complex_probs = np.where(complex_highest_probs >= conf_value_2, complex_probs, None)
+        # reduced_complex_probs = reduced_complex_probs[reduced_complex_probs != np.array(None)] # remove None values
+        # reduced_complex_probs = np.asarray(reduced_complex_probs, dtype=np.float64)
+        
+        complex_preds = np.argmax(complex_probs, axis=1)
+
     # -----------------------------------
     # Get most complex inputs
     most_complex_indices = np.zeros(0)
-    if complex_indices.shape[0] + simple_indices.shape[0] < len(indices):
-        most_complex_indices = np.where(complex_highest_probs < conf_value_2, indices, None)
+    most_complex_preds = []
+    if not (complex_highest_probs is None):
+        most_complex_indices = np.where(complex_highest_probs < conf_value_2, complex_indices, None)
         most_complex_indices = most_complex_indices[most_complex_indices != np.array(None)] # remove None values
         most_complex_indices = np.asarray(most_complex_indices, dtype=np.int64)
 
         print('most complex indices', most_complex_indices.shape)
 
         most_complex_inputs = np.take(inputs, most_complex_indices, axis=0)
-        if most_complex_inputs.shape[0] == 0:
-            most_complex_preds = []
-        else:
+        if most_complex_inputs.shape[0] != 0:
             most_complex_probs = most_complex_model.predict(most_complex_inputs)
             most_complex_highest_probs = np.amax(most_complex_probs, axis=1)
             most_complex_preds = np.argmax(most_complex_probs, axis=1)
+
     # -----------------------------------
     # Reorganize preds
     combined_preds = np.arange(inputs.shape[0])
@@ -94,7 +102,10 @@ def run_combined(simple_model, complex_model, most_complex_model, inputs, labels
     if most_complex_indices.shape[0] != 0:
         np.put(combined_preds, most_complex_indices, most_complex_preds)
 
-    return tf.reduce_mean(tf.cast(tf.equal(combined_preds, labels), tf.float32)).numpy(), time.time() - before
+    simple_percent = simple_indices.shape[0] / (simple_indices.shape[0] + complex_indices.shape[0] + most_complex_indices.shape[0])
+    complex_percent = complex_indices.shape[0] / (simple_indices.shape[0] + complex_indices.shape[0] + most_complex_indices.shape[0])
+
+    return tf.reduce_mean(tf.cast(tf.equal(combined_preds, labels), tf.float32)).numpy(), time.time() - before, simple_percent, complex_percent
 
 def main():
     print('Loading data...')
@@ -131,16 +142,22 @@ def main():
 
     all_model_accuracies = []
     all_model_times = []
+    all_model_simple_percents = []
+    all_model_complex_percents = []
 
     for i in range(5):
         print("Run l1 l2 l3... #" + str(i))
-        all_conf_values, accuracies, times = run_combinations(l1_model, l2_model, l3_model, x_test, y_test)
+        all_conf_values, accuracies, times, simple_percents, complex_percents = run_combinations(l1_model, l2_model, l3_model, x_test, y_test)
         all_model_accuracies.append(accuracies)
         all_model_times.append(times)
+        all_model_simple_percents.append(simple_percents)
+        all_model_complex_percents.append(complex_percents)
 
     print("All Conf Values:", all_conf_values)
     print("L1 L2 L3 Accuracies:", np.mean(all_model_accuracies, axis=0))
     print("L1 L2 L3 Times:", np.mean(all_model_times, axis=0))
+    print("L1 L2 L3 Simple Percents:", np.mean(all_model_simple_percents, axis=0))
+    print("L1 L2 L3 Complex Percents:", np.mean(all_model_complex_percents, axis=0))
 
 if __name__ == '__main__':
     main()

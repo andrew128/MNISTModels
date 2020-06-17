@@ -39,12 +39,14 @@ def run_combinations(simple_model, complex_model, x_data, y_data):
 
     accuracies = []
     times = []
+    simplePercents = []
     for conf_value in conf_values:
-        accuracy, time = run_combined(simple_model, complex_model, x_data, y_data, conf_value)
+        accuracy, time, simplePercent = run_combined(simple_model, complex_model, x_data, y_data, conf_value)
         accuracies.append(accuracy)
         times.append(time)
+        simplePercents.append(simplePercent)
     
-    return accuracies, times
+    return accuracies, times, simplePercents
 
 def run_combined(simple_model, complex_model, inputs, labels, conf_value):
     '''
@@ -84,7 +86,9 @@ def run_combined(simple_model, complex_model, inputs, labels, conf_value):
     np.put(combined_preds, simple_indices, simple_preds)
     np.put(combined_preds, complex_indices, complex_preds)
 
-    return tf.reduce_mean(tf.cast(tf.equal(combined_preds, labels), tf.float32)).numpy(), time.time() - before
+    simplePercent = simple_indices.shape[0] / (simple_indices.shape[0] + complex_indices.shape[0])
+
+    return tf.reduce_mean(tf.cast(tf.equal(combined_preds, labels), tf.float32)).numpy(), time.time() - before, simplePercent
 
 def main():
     print('Loading data...')
@@ -105,15 +109,16 @@ def main():
 
     for i in range(5):
         before_time = time.time()
-        accuracy = l1_model.evaluate(x_test, y_test)
+        accuracy = l1_model.predict(x_test)
         l1_time += time.time() - before_time
+        print(l1_time)
 
         before_time = time.time()
-        accuracy = l2_model.evaluate(x_test, y_test)
+        accuracy = l2_model.predict(x_test)
         l2_time += time.time() - before_time
 
         before_time = time.time()
-        accuracy = l3_model.evaluate(x_test, y_test)
+        accuracy = l3_model.predict(x_test)
         l3_time += time.time() - before_time
 
     print("L1 Time:", l1_time / 5)
@@ -126,29 +131,38 @@ def main():
     l1_l2_times = []
     l1_l3_times = []
     l2_l3_times = []
+    l1_l2_percents = []
+    l1_l3_percents = []
+    l2_l3_percents = []
 
     for i in range(5):
         print("Run l1 l2... #" + str(i))
-        accuracies, times = run_combinations(l1_model, l2_model, x_test, y_test)
+        accuracies, times, simplePercents = run_combinations(l1_model, l2_model, x_test, y_test)
         l1_l2_accuracies.append(accuracies)
         l1_l2_times.append(times)
+        l1_l2_percents.append(simplePercents)
 
         print("Run l1 l3... #" + str(i))
-        accuracies, times = run_combinations(l1_model, l3_model, x_test, y_test)
+        accuracies, times, simplePercents = run_combinations(l1_model, l3_model, x_test, y_test)
         l1_l3_accuracies.append(accuracies)
         l1_l3_times.append(times)
+        l1_l3_percents.append(simplePercents)
 
         print("Run l2 l3... #" + str(i))
-        accuracies, times = run_combinations(l2_model, l3_model, x_test, y_test)
+        accuracies, times, simplePercents = run_combinations(l2_model, l3_model, x_test, y_test)
         l2_l3_accuracies.append(accuracies)
         l2_l3_times.append(times)
+        l2_l3_percents.append(simplePercents)
 
     print("L1 L2 Accuracies:", np.mean(l1_l2_accuracies, axis=0))
     print("L1 L2 Times:", np.mean(l1_l2_times, axis=0))
+    print("L1 L2 Simple Percents", np.mean(l1_l2_percents, axis=0))
     print("L1 L3 Accuracies:", np.mean(l1_l3_accuracies, axis=0))
     print("L1 L3 Times:", np.mean(l1_l3_times, axis=0))
+    print("L1 L3 Simple Percents", np.mean(l1_l3_percents, axis=0))
     print("L2 L3 Accuracies:", np.mean(l2_l3_accuracies, axis=0))
     print("L2 L3 Times:", np.mean(l2_l3_times, axis=0))
+    print("L2 L3 Simple Percents", np.mean(l2_l3_percents, axis=0))
 
     # print("Run l1 l2...")
     # accuracies, times = run_combinations(l1_model, l2_model, x_test, y_test)
