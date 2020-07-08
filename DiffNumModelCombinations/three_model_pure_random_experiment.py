@@ -58,7 +58,6 @@ def run_combined(simple_model, complex_model, most_complex_model, inputs, labels
     reduced_simple_probs = np.take(simple_probs, simple_indices, axis=0)
     simple_preds = reduced_simple_probs.argmax(axis=1)
 
-    random_values = np.random.rand(inputs.shape[0])
     # -----------------------------------
     # Complex where r > p_L1 and r < p_L2
     complex_indices = np.zeros(0)
