@@ -26,7 +26,7 @@ def get_untrained_l4_all_digit_model(input_shape):
 
     # Compile the model
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
     return model
 
@@ -57,7 +57,7 @@ def get_untrained_l3_all_digit_model(input_shape):
 
     # Compile the model
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
     return model
 
@@ -81,7 +81,7 @@ def get_untrained_l2_all_digit_model(input_shape):
     model.add(Dropout(0.2))
     model.add(Dense(10,activation=tf.nn.softmax))
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
 
     return model
@@ -103,7 +103,7 @@ def get_untrained_l1_all_digit_model():
     model.add(Dropout(0.2))
     model.add(Dense(10,activation=tf.nn.softmax))
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
 
     return model
@@ -122,7 +122,7 @@ def get_untrained_l0_all_digit_model():
     # model.add(Dropout(0.2))
     model.add(Dense(10,activation=tf.nn.softmax))
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
 
     return model

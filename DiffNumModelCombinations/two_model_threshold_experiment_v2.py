@@ -52,6 +52,7 @@ def run_combined(simple_model, complex_model, inputs, labels, conf_value, thresh
     threshold_count = 0
     for i in range(inputs.shape[0]):
         second_highest = np.partition(simple_probs[i], -2)[-2]
+        print(simple_probs[i])
         diff = simple_highest_probs[i] - second_highest
         if simple_highest_probs[i] < conf_value and diff < threshold:
             complex_indices.append(i)
