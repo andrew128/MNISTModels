@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 import helpers.helper_funcs as helpers
-import helpers.models as models
+import helpers.mnist_models as models
 
 def train_and_save_models(x_train, y_train):
     # Train each of the models 
