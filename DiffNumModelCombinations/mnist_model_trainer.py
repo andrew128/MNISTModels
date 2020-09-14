@@ -11,19 +11,19 @@ def train_and_save_models(x_train, y_train):
 
     # No hidden layers (printistic regression)
     l0_model = models.get_trained_l0_all_digit_model(x_train, y_train)
-    l0_model.save('models/l0_model')
+    l0_model.save('models/mnist/l0_model')
 
     # 1 hidden layer
     l1_model = models.get_trained_l1_all_digit_model(x_train, y_train)
-    l1_model.save('models/l1_model')
+    l1_model.save('models/mnist/l1_model')
 
     # 1 conv layer, 1 hidden layer
     l2_model = models.get_trained_l2_all_digit_model(x_train, y_train, input_shape)
-    l2_model.save('models/l2_model')
+    l2_model.save('models/mnist/l2_model')
 
     # 2 conv layers, 1 hidden layer
     l3_model = models.get_trained_l3_all_digit_model(x_train, y_train, input_shape)
-    l3_model.save('models/l3_model')
+    l3_model.save('models/mnist/l3_model')
 
     # 3 conv layers, 1 hidden layer
     # l4_model = models.get_trained_l4_all_digit_model(x_train, y_train, input_shape)
