@@ -2,11 +2,20 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-from helpers.models import *
+from helpers.mnist_models import *
+from helpers.cifar_models import *
 
 def get_cifar10_data():
     (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
-    train_images, test_images = train_images / 255.0, test_images / 255.0
+
+    train_images = train_images.reshape(train_images.shape[0], 32, 32, 3)
+    test_images = test_images.reshape(test_images.shape[0], 32, 32, 3)
+
+    train_images = train_images.astype('float32')
+    test_images = test_images.astype('float32')
+
+    train_images /= 255.0
+    test_images /= 255.0
 
     return (train_images, train_labels, test_images, test_labels)
 
